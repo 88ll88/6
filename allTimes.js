@@ -1,5 +1,5 @@
 // 計算函式 (結構完全統一)
-function time(group) {
+function times(group) {
     var s = {};
     for (var n = 1; n <= 39; n++) s[n.toString().padStart(2, '0')] = new Array(40).fill(0);
     group.forEach(function(k) {
