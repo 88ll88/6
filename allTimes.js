@@ -1,30 +1,20 @@
-function times(group) {
-    var list = {};
-    for (var n = 1; n <= 39; n++) list[n.toString().padStart(2, '0')] = new Array(40).fill(0);
+var obj = {}; // 這是我們的大字典
 
-    group.forEach(function(years) {
-        if (!years || years.years < 2) return;
-        for (var i = 1; i < years.length; i++) {
-            var old = years[i].de || years[i];
-            var news = years[i-1].de || years[i-1];
-            
-            old.forEach(function(h) {
-                var num = h.toString().padStart(2, '0');
-                if (list[num]) {
-                    news.forEach(function(t) { list[num][parseInt(t)]++; });
-                }
-            });
-        }
-    });
-
-    var r = {};
-    for (var k in list) r[k] = list[k].slice(1); 
-    return JSON.stringify(r);
+// 外層循環：遍歷 01 到 39 號作為「主角」
+for (var i = 1; i <= 39; i++) {
+    var target = i.toString().padStart(2, '0');
+    var rowData = [];
+    
+    // 內層循環：針對主角，統計它拖出 01 到 39 號的次數
+    for (var k = 1; k <= 39; k++) {
+        var num = k.toString().padStart(2, '0');
+        rowData.push(s[target][num] || 0); // 從你之前的 s 抽屜裡拿次數
+    }
+    
+    obj[target] = rowData; // 存入字典： "01": [次數, 次數, ...]
 }
 
-
-console.log("1. 2007-2025.js:",times([T,S,R,Q,P,O,N,M,L,K,J,I,H,G,F,E,D,C,B]));
-
-console.log("2. 2024-今.js:", times([C, B, A]));
-
-console.log("3. 2025-今.js:", times([B, A]));
+// 將整個大字典轉成文字，方便你複製保存
+var finalData = JSON.stringify(obj);
+console.log("--- 以下是 01-39 完整的數據，請複製保存 ---");
+console.log(finalData);
