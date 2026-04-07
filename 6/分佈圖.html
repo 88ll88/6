@@ -9,13 +9,9 @@
         .nav-bar { width: 1202px; display: flex; gap: 1px; margin-bottom: 2px; }
         .nav-tab { flex: 1; padding: 10px 0; background: #333; color: #ccc; font-size: 12px; text-align: center; text-decoration: none; border: 1px solid #444; font-weight: bold; }
         .nav-tab.active { background: #ff9900 !important; color: #000 !important; }
-        .viewport { width: 1202px; height: 442px; background: #fff; border: 1px solid #fff; position: relative; display: flex; }
-        #data-layer { width: 1000px; height: 380px; overflow: hidden; }
-        .side-ctrl { width: 200px; border-left: 2px solid #000; display: flex; flex-direction: column; background: #eee; }
-        .btn-40 { height: 40px; border-bottom: 1px solid #000; background: #ddd; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; }
+        .viewport { width: 1202px; background: #fff; border: 1px solid #fff; min-height: 442px; position: relative; }
         .row-20 { height: 20px; border-bottom: 1px solid #eee; display: flex; font-size: 11px; line-height: 20px; }
-        .lamp { width: 18px; height: 18px; border-radius: 50%; color: #fff; margin: 1px auto; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 10px; }
-        .lamp-red { background: #FF0000; } .lamp-blue { background: #00008B; } .lamp-darkred { background: #8B0000; }
+        .lamp { width: 18px; height: 18px; border-radius: 50%; background: #FF0000; color: #fff; margin: 1px auto; display: flex; align-items: center; justify-content: center; font-weight: bold; }
     </style>
     <script src="https://88ll88.github.io/888/aaa.js"></script>
 </head>
@@ -25,38 +21,24 @@
         <a href="柱狀圖.html" class="nav-tab">柱狀圖</a>
         <a href="三分區.html" class="nav-tab">三分區</a>
         <a href="拖牌.html" class="nav-tab">拖牌</a>
-        <a href="index.html" class="nav-tab" style="background:#555;">首頁</a>
+        <a href="遺漏.html" class="nav-tab">遺漏</a>
+        <a href="統計表.html" class="nav-tab">統計表</a>
     </div>
-    <div class="viewport">
-        <div id="data-layer"></div>
-        <div class="side-ctrl">
-            <div class="btn-40" onclick="location.href='柱狀圖.html'">分佈 ⇆ 柱狀</div>
-            <div class="btn-40" onclick="tgDate()">日期 ⇆ 期次</div>
-            <div class="btn-40" onclick="tgSort()">號碼 ⇆ 遞增 ⇆ 球序</div>
-        </div>
-    </div>
+    <div class="viewport" id="data-layer"></div>
     <script>
-        let isIssue = false, sortMode = 0;
-        const lamps = ['lamp-red', 'lamp-blue', 'lamp-darkred'];
-        function tgDate() { isIssue = !isIssue; render(); }
-        function tgSort() { sortMode = (sortMode + 1) % 3; render(); }
-        function render() {
-            let html = '';
-            for(let r=0; r<19; r++) {
-                let row = aaa[r];
-                let date = row[0].split('(')[0], issue = row[0].match(/\(([^)]+)\)/)[1];
-                let nums = [...row[1]];
-                if(sortMode === 1) nums.sort((a,b)=>a-b);
-                html += `<div class="row-20"><div style="width:100px;text-align:center">${isIssue?issue:date}</div><div style="width:100px;color:blue;text-align:center;font-weight:bold">${nums.join(',')}</div><div style="width:780px;display:flex">`;
-                for(let i=1; i<=39; i++) {
-                    let hit = row[1].map(Number).includes(i);
-                    html += `<div style="width:20px;text-align:center;border-right:1px solid #f0f0f0">${hit?`<div class="lamp ${lamps[sortMode]}">${i}</div>`:r+1}</div>`;
+        window.onload = function(){
+            let h = '';
+            for(let r=0; r<18; r++){
+                let n = aaa[r][1];
+                h += `<div class="row-20"><div style="width:100px;text-align:center">${aaa[r][0].split('(')[0]}</div><div style="width:1100px;display:flex">`;
+                for(let i=1;i<=39;i++){
+                    let b = i<10?'0'+i:''+i;
+                    h += `<div style="width:28px;text-align:center;border-right:1px solid #f0f0f0">${n.includes(b)?`<div class="lamp">${b}</div>`:r+1}</div>`;
                 }
-                html += `</div></div>`;
+                h += `</div></div>`;
             }
-            document.getElementById('data-layer').innerHTML = html;
+            document.getElementById('data-layer').innerHTML = h;
         }
-        window.onload = render;
     </script>
 </body>
 </html>
