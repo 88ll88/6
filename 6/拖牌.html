@@ -4,20 +4,29 @@
     <meta charset="UTF-8">
     <title>539 拖牌分析</title>
     <style>
+        /* 1202px 規格鎖死，保證導航列不消失 */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Consolas", "微軟正黑體"; }
-        body { background: #000; width: 1202px; margin: 0 auto; padding-top: 5px; }
+        body { background: #000; width: 1202px; margin: 0 auto; padding-top: 5px; overflow-x: hidden; }
+        
+        /* 導航列：每一頁都必須長得一模一樣 */
         .nav-bar { width: 1202px; display: flex; gap: 1px; margin-bottom: 2px; }
         .nav-tab { flex: 1; padding: 10px 0; background: #333; color: #ccc; font-size: 12px; text-align: center; text-decoration: none; border: 1px solid #444; font-weight: bold; }
         .nav-tab.active { background: #ff9900 !important; color: #000 !important; }
-        .viewport { width: 1202px; min-height: 442px; background: #fff; border: 1px solid #fff; display: flex; flex-direction: column; }
-        .info-head { background: #eee; padding: 10px; font-weight: bold; border-bottom: 2px solid #000; }
-        .res-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 20px; }
-        .res-card { border: 1px solid #ccc; padding: 10px; background: #fafafa; text-align: center; }
-        .ball { display: inline-block; width: 30px; height: 30px; background: #8B0000; color: #fff; border-radius: 50%; line-height: 30px; font-weight: bold; }
+        .nav-tab:hover { background: #444; }
+
+        /* 主視窗內容 */
+        .viewport { width: 1202px; min-height: 442px; background: #fff; border: 1px solid #fff; position: relative; display: flex; flex-direction: column; }
+        
+        .info-head { background: #000; color: #fff; padding: 10px; font-weight: bold; font-size: 16px; border-bottom: 2px solid #ff9900; }
+        .res-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; padding: 20px; background: #fff; }
+        .res-card { border: 2px solid #eee; padding: 15px; background: #fafafa; text-align: center; border-radius: 8px; }
+        .ball { display: inline-block; width: 35px; height: 35px; background: #8B0000; color: #fff; border-radius: 50%; line-height: 35px; font-weight: bold; font-size: 18px; margin-bottom: 8px; box-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
+        .count-text { color: #333; font-size: 14px; font-weight: bold; }
     </style>
     <script src="https://88ll88.github.io/888/aaa.js"></script>
 </head>
 <body>
+
     <div class="nav-bar">
         <a href="分佈圖.html" class="nav-tab">分佈圖</a>
         <a href="柱狀圖.html" class="nav-tab">柱狀圖</a>
@@ -25,30 +34,57 @@
         <a href="拖牌.html" class="nav-tab active">拖牌</a>
         <a href="遺漏.html" class="nav-tab">遺漏</a>
         <a href="統計表.html" class="nav-tab">統計表</a>
+        <a href="index.html" class="nav-tab" style="background:#555;">首頁</a>
     </div>
+
     <div class="viewport">
-        <div class="info-head" id="last-info">最新一期：加載中...</div>
-        <div class="res-grid" id="drag-res"></div>
+        <div class="info-head" id="last-info">大數據分析中...</div>
+        <div class="res-grid" id="drag-res">
+            </div>
     </div>
+
     <script>
         window.onload = function() {
-            let last = aaa[0];
-            document.getElementById('last-info').innerText = `依據最新期號 [${last[1].join(', ')}] 分析歷史拖牌：`;
+            if (typeof aaa === 'undefined') {
+                document.getElementById('last-info').innerText = "錯誤：無法讀取 aaa.js 數據";
+                return;
+            }
+
+            // 1. 抓最新一期的號碼
+            let lastDraw = aaa[0]; 
+            let lastNums = lastDraw[1];
+            document.getElementById('last-info').innerText = `依據最新期號 [${lastNums.join(', ')}] 分析歷史拖牌 (前10名)：`;
+
+            // 2. 建立統計物件
             let stats = {};
-            last[1].forEach(n => {
-                let hitCount = 0;
-                for(let i=1; i<aaa.length; i++) {
-                    if(aaa[i][1].includes(n)) {
-                        aaa[i-1][1].forEach(nextN => {
-                            stats[nextN] = (stats[nextN] || 0) + 1;
+            for(let i=1; i<=39; i++) stats[i<10?'0'+i : ''+i] = 0;
+
+            // 3. 掃描歷史：當這 5 個號碼出現時，下一期開什麼？
+            lastNums.forEach(targetNum => {
+                for(let i=1; i < aaa.length; i++) {
+                    // 如果歷史中這一期有開出目標號碼
+                    if(aaa[i][1].includes(targetNum)) {
+                        // 統計它的下一期 (aaa[i-1]) 開了哪些號碼
+                        aaa[i-1][1].forEach(nextNum => {
+                            stats[nextNum]++;
                         });
                     }
                 }
             });
-            let sorted = Object.entries(stats).sort((a,b) => b[1] - a[1]).slice(0, 10);
+
+            // 4. 排序取出前 10 名
+            let sorted = Object.entries(stats)
+                .sort((a,b) => b[1] - a[1])
+                .slice(0, 10);
+
+            // 5. 渲染到畫面上
             let html = '';
             sorted.forEach(item => {
-                html += `<div class="res-card"><div class="ball">${item[0]}</div><br>出現 ${item[1]} 次</div>`;
+                html += `
+                <div class="res-card">
+                    <div class="ball">${item[0]}</div>
+                    <div class="count-text">歷史拖出：<span style="color:red;">${item[1]}</span> 次</div>
+                </div>`;
             });
             document.getElementById('drag-res').innerHTML = html;
         }
