@@ -2,6 +2,83 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <title>539 綜合統計表</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Consolas", "微軟正黑體"; }
+        body { background: #000; width: 1202px; margin: 0 auto; padding-top: 5px; }
+        .nav-bar { width: 1202px; display: flex; gap: 1px; margin-bottom: 2px; }
+        .nav-tab { flex: 1; padding: 10px 0; background: #333; color: #ccc; font-size: 12px; text-align: center; text-decoration: none; border: 1px solid #444; font-weight: bold; }
+        .nav-tab.active { background: #ff9900 !important; color: #000 !important; }
+
+        .viewport { width: 1202px; background: #fff; border: 1px solid #fff; padding: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        th { background: #000; color: #fff; padding: 10px; border: 1px solid #ccc; font-size: 14px; }
+        td { padding: 8px; border: 1px solid #ccc; text-align: center; font-weight: bold; font-size: 15px; }
+        .ball-num { color: #8B0000; font-size: 18px; }
+        .high { color: red; } /* 高機率標紅 */
+    </style>
+    <script src="https://88ll88.github.io/888/aaa.js"></script>
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="分佈圖.html" class="nav-tab">分佈圖</a>
+        <a href="柱狀圖.html" class="nav-tab">柱狀圖</a>
+        <a href="三分區.html" class="nav-tab">三分區</a>
+        <a href="拖牌.html" class="nav-tab">拖牌</a>
+        <a href="遺漏.html" class="nav-tab">遺漏</a>
+        <a href="統計表.html" class="nav-tab active">統計表</a>
+    </div>
+
+    <div class="viewport">
+        <table>
+            <thead>
+                <tr>
+                    <th>號碼</th>
+                    <th>近 20 期次數</th>
+                    <th>近 50 期次數</th>
+                    <th>近 100 期次數</th>
+                    <th>100期總機率</th>
+                </tr>
+            </thead>
+            <tbody id="stat-body"></tbody>
+        </table>
+    </div>
+
+    <script>
+        window.onload = function() {
+            let html = '';
+            for(let i=1; i<=39; i++) {
+                let c20 = 0, c50 = 0, c100 = 0;
+                let ballStr = i < 10 ? '0' + i : '' + i;
+                
+                // 統計次數
+                for(let r=0; r<100; r++) {
+                    if(!aaa[r]) break;
+                    let nums = aaa[r][1];
+                    if(nums.includes(ballStr)) {
+                        if(r < 20) c20++;
+                        if(r < 50) c50++;
+                        c100++;
+                    }
+                }
+                
+                let percent = (c100 / 100 * 100).toFixed(0) + '%';
+                html += `<tr>
+                    <td class="ball-num">${ballStr}</td>
+                    <td>${c20}</td>
+                    <td>${c50}</td>
+                    <td class="${c100 >= 18 ? 'high' : ''}">${c100}</td>
+                    <td>${percent}</td>
+                </tr>`;
+            }
+            document.getElementById('stat-body').innerHTML = html;
+        }
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #000; padding: 20px; display: flex; justify-content: center; }
