@@ -2,20 +2,43 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>分佈圖</title>
+    <title>539 分佈圖 - 精密版</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Consolas", "微軟正黑體"; }
-        body { background: #000; width: 1202px; margin: 0 auto; padding-top: 5px; overflow-x: hidden; }
+        body { background: #000; width: 1202px; margin: 0 auto; padding-top: 5px; }
+        
+        /* 導航列：1202px 均分 6 格 */
         .nav-bar { width: 1202px; display: flex; gap: 1px; margin-bottom: 2px; }
         .nav-tab { flex: 1; padding: 10px 0; background: #333; color: #ccc; font-size: 12px; text-align: center; text-decoration: none; border: 1px solid #444; font-weight: bold; }
         .nav-tab.active { background: #ff9900 !important; color: #000 !important; }
-        .viewport { width: 1202px; background: #fff; border: 1px solid #fff; min-height: 442px; position: relative; }
-        .row-20 { height: 20px; border-bottom: 1px solid #eee; display: flex; font-size: 11px; line-height: 20px; }
-        .lamp { width: 18px; height: 18px; border-radius: 50%; background: #FF0000; color: #fff; margin: 1px auto; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        /* 主表格容器 */
+        .viewport { width: 1202px; background: #fff; overflow: hidden; border: 1px solid #666; }
+        
+        /* 表頭與行通用樣式 */
+        .grid-row { display: flex; height: 20px; border-bottom: 1px solid #ddd; align-items: center; }
+        .cell { width: 20px; height: 20px; border-right: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #333; }
+        
+        /* 寬度定義 */
+        .w-date { width: 100px; cursor: pointer; background: #f8f8f8; font-weight: bold; }
+        .w-nums { width: 100px; cursor: pointer; background: #f8f8f8; font-weight: bold; }
+        .w-balls { width: 780px; display: flex; }
+        .w-index { width: 20px; background: #f0f0f0; }
+
+        /* 亮燈樣式 */
+        .lamp { width: 18px; height: 18px; border-radius: 50%; color: #fff; font-weight: bold; font-size: 10px; line-height: 18px; text-align: center; }
+        .lamp-red { background: #FF0000; }     /* 號碼模式 */
+        .lamp-blue { background: #0000BB; }    /* 遞增模式 */
+        .lamp-darkred { background: #8B0000; } /* 落球序模式 */
+
+        /* 黑尾列 */
+        .footer-black { background: #000 !important; color: #fff !important; border-bottom: none; }
+        .footer-black .cell { color: #fff; border-right: 1px solid #444; }
     </style>
     <script src="https://88ll88.github.io/888/aaa.js"></script>
 </head>
 <body>
+
     <div class="nav-bar">
         <a href="分佈圖.html" class="nav-tab active">分佈圖</a>
         <a href="柱狀圖.html" class="nav-tab">柱狀圖</a>
@@ -24,17 +47,71 @@
         <a href="遺漏.html" class="nav-tab">遺漏</a>
         <a href="統計表.html" class="nav-tab">統計表</a>
     </div>
-    <div class="viewport" id="data-layer"></div>
-    <script>
-        window.onload = function(){
-            let h = '';
-            for(let r=0; r<18; r++){
-                let n = aaa[r][1];
-                h += `<div class="row-20"><div style="width:100px;text-align:center">${aaa[r][0].split('(')[0]}</div><div style="width:1100px;display:flex">`;
-                for(let i=1;i<=39;i++){
-                    let b = i<10?'0'+i:''+i;
-                    h += `<div style="width:28px;text-align:center;border-right:1px solid #f0f0f0">${n.includes(b)?`<div class="lamp">${b}</div>`:r+1}</div>`;
-                }
+
+    <div class="viewport">
+        <div class="grid-row" style="background:#eee; font-weight:bold;">
+            <div class="cell w-date" id="head-date" onclick="toggleDate()">日期</div>
+            <div class="cell w-nums" id="head-nums" onclick="toggleSort()">號碼</div>
+            <div class="w-balls">
+                <script>
+                    for(let i=1; i<=39; i++) document.write(`<div class="cell">${i<10?'0'+i:i}</div>`);
+                </script>
+            </div>
+            <div class="cell w-index">#</div>
+        </div>
+
+        <div id="data-container"></div>
+    </div>
+
+<script>
+    let isIssueMode = false; // false: 日期, true: 期次
+    let sortMode = 0;        // 0: 紅(號碼), 1: 深藍(遞增), 2: 深紅(球序)
+    const modes = [
+        { label: "號碼", color: "lamp-red" },
+        { label: "遞增", color: "lamp-blue" },
+        { label: "落球序", color: "lamp-darkred" }
+    ];
+
+    function toggleDate() {
+        isIssueMode = !isIssueMode;
+        document.getElementById('head-date').innerText = isIssueMode ? "期次" : "日期";
+        render();
+    }
+
+    function toggleSort() {
+        sortMode = (sortMode + 1) % 3;
+        document.getElementById('head-nums').innerText = modes[sortMode].label;
+        render();
+    }
+
+    function render() {
+        let html = '';
+        // 渲染前 19 行數據
+        for (let r = 0; r < 19; r++) {
+            if (!aaa[r]) break;
+            
+            let dateStr = aaa[r][0].split('(')[0];
+            let issueStr = aaa[r][0].match(/\(([^)]+)\)/)[1];
+            let displayDate = isIssueMode ? issueStr : dateStr;
+            
+            let originalNums = [...aaa[r][1]]; // 球序
+            let sortedNums = [...aaa[r][1]].sort((a,b) => a-b); // 遞增
+            
+            // 根據模式決定顯示號碼字串與判斷亮的燈
+            let displayNumsStr = (sortMode === 2) ? originalNums.join(',') : sortedNums.join(',');
+            let hitNums = originalNums.map(n => parseInt(n));
+
+            html += `<div class="grid-row">`;
+            html += `<div class="cell w-date">${displayDate}</div>`;
+            html += `<div class="cell w-nums" style="color:blue;">${displayNumsStr}</div>`;
+            html += `<div class="w-balls">`;
+            for (let i = 1; i <= 39; i++) {
+                let isHit = hitNums.includes(i);
+                html += `<div class="cell">${isHit ? `<div class="lamp ${modes[sortMode].color}">${i<10?'0'+i:i}</div>` : r+1}</div>`;
+            }
+            html += `</div>`;
+            html += `<div class="cell w-index">${r+1}</div>`;
+            html += `</div>`;                }
                 h += `</div></div>`;
             }
             document.getElementById('data-layer').innerHTML = h;
