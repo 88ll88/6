@@ -54,36 +54,4 @@
         }
     </script>
 </body>
-</html>        "01":742, "02":720, "03":755, "04":718, "05":782, "06":731, "07":710, "08":748, "09":761, "10":752,
-        "11":739, "12":728, "13":741, "14":794, "15":712, "16":750, "17":737, "18":721, "19":785, "20":708,
-        "21":744, "22":767, "23":753, "24":730, "25":749, "26":723, "27":771, "28":705, "29":812, "30":736,
-        "31":742, "32":718, "33":760, "34":727, "35":755, "36":732, "37":709, "38":746, "39":720
-    };
-
-    const maxVal = 812; // 29號
-    const ratio = 380 / maxVal; // 每一刻度的物理高度
-    const stage = document.getElementById('stage');
-
-    let html = "";
-    for(let i=1; i<=39; i++) {
-        let n = i.toString().padStart(2, '0');
-        let c = data[n];
-        
-        // 真正的物理高度：次數 * 比例
-        let h = c * ratio;
-        
-        let cls = "pillar" + (c === maxVal ? " is-max" : "");
-
-        html += `
-            <div class="bar-wrap">
-                <div class="${cls}" style="height: ${h}px;">
-                    <div class="count-txt">${c}</div>
-                </div>
-                <div class="num-txt">${n}</div>
-            </div>
-        `;
-    }
-    stage.innerHTML = html;
-</script>
-</body>
 </html>
