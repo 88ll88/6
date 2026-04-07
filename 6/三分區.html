@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>539 實戰 20 圖全矩陣</title>
+    <style>
+        :root { --u: 12px; --gh: 200px; } /* 單格寬 12px，確保 39 根柱子能橫向排開 */
+        * { box-sizing: border-box; font-family: "Courier New", monospace; margin: 0; padding: 0; }
+        body { background: #fff; padding: 10px; overflow-x: auto; }
+
+        /* 總表容器 */
+        .matrix-table { display: flex; flex-direction: column; width: fit-content; border: 2px solid #000; }
+
+        /* 每一列 (5列) */
+        .row-group { display: flex; border-bottom: 2px solid #000; background: #fff; }
+        .row-group:last-child { border-bottom: none; }
+
+        /* 每個圖的框架 (20個框) */
+        .chart-box { 
+            width: calc(var(--u) * 39 + 30px); 
+            border-right: 1px solid #000; 
+            padding: 10px; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+        }
+        .chart-box:last-child { border-right: none; }
+
+        /* 標頭文字 */
+        .title-bar { 
+            width: 100%; text-align: center; font-weight: bold; font-size: 13px; 
+            margin-bottom: 10px; padding: 3px; background: #eee; border: 1px solid #000;
+        }
+        .ball-main { background: #000; color: #fff; } /* 左側第一欄特殊色 */
+
+        /* 柱狀圖核心 (185px) */
+        .chart-main { 
+            display: flex; height: var(--gh); align-items: flex-end; 
+            border-bottom: 2px solid #000; border-left: 1px solid #000; 
+            position: relative; width: calc(var(--u) * 39);
+        }
+
+        /* 180px 紅色虛線 */
+        .limit-180 { 
+            position: absolute; bottom: 180px; left: 0; width: 100%; 
+            border-top: 2px dashed red; z-index: 10; opacity: 0.6;
+        }
+
+        /* 柱子元件 */
+        .col { width: var(--u); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; position: relative; }
+        .bar { width: 7px; background: #7030a0; z-index: 5; } /* 紫柱 */
+        .bar.hot { background: #f00; } /* 前三名紅柱 */
+
+        /* 底部 [01-39] 標籤 */
+        .labels-39 { display: flex; width: calc(var(--u) * 39); margin-top: 5px; }
+        .n-tag { width: var(--u); text-align: center; font-size: 8px; font-weight: bold; color: #333; transform: scale(0.8); }
+
+        /* 數據腳註 */
+        .footer-info { font-size: 11px; font-weight: bold; margin-top: 5px; color: #f00; }
+    </style>
+</head>
+<body>
+
+<div id="app" class="matrix-table"></div>
+
+<script src="https://88ll88.github.io/888/ddd.js"></script>
+
+<script>
+    // 計算拖牌分佈
+    function getStats(ball) {
+        let c = {};
+        for(let i=1; i<=39; i++) c[i.toString().padStart(2,'0')] = 0;
+        for (let i = window.ddd.length - 2; i >= 0; i--) {
+            if (window.ddd[i+1].slice(1).includes(ball)) {
+                window.ddd[i].slice(1).forEach(b => { if(c[b]!==undefined) c[b]++; });
+            }
+        }
+        return c;
+    }
+
+    function renderMatrix() {
+        if (!window.ddd) return;
+        const last5 = window.ddd[0].slice(1);
+        const baseMin = 698, recordHigh = 807, chartMaxH = 185;
+        const ratio = chartMaxH / (recordHigh - baseMin);
+
+        let html = "";
+        last5.forEach((ball, rIdx) => {
+            const stats = getStats(ball);
+            const sorted = Object.entries(stats).sort((a,b)=>b[1]-a[1]);
+            const top3 = sorted.slice(0, 3); // [[num, count], ...]
+
+            html += `<div class="row-group">`;
+            
+            // 每一列產生 4 個 [01-39] 柱狀圖
+            for(let cIdx=0; cIdx<4; cIdx++) {
+                let isMain = (cIdx === 0);
+                let title = isMain ? `當期球 ${ball} 全盤拖牌` : `強拖第 ${cIdx} 名：${top3[cIdx-1][0]}`;
+                let targetNum = isMain ? "" : top3[cIdx-1][0];
+                let targetCount = isMain ? "" : top3[cIdx-1][1] + " 次";
+
+                html += `
+                <div class="chart-box">
+                    <div class="title-bar ${isMain?'ball-main':''}">${title}</div>
+                    <div class="chart-main">
+                        <div class="limit-180"></div>`;
+                
+                Object.keys(stats).forEach(num => {
+                    let val = stats[num];
+                    let h = (val <= baseMin) ? 0 : (val - baseMin) * ratio;
+                    // 顏色邏輯：第一張標前三紅，後三張只標對應的那一根紅
+                    let isHot = isMain ? top3.map(x=>x[0]).includes(num) : num === targetNum;
+                    
+                    html += `
+                        <div class="col">
+                            <div class="bar ${isHot?'hot':''}" style="height:${h}px"></div>
+                        </div>`;
+                });
+
+                html += `</div>
+                    <div class="labels-39">`;
+                for(let n=1; n<=39; n++) html += `<div class="n-tag">${String(n).padStart(2,'0')}</div>`;
+                html += `</div>
+                    <div class="footer-info">${targetCount}</div>
+                </div>`;
+            }
+            html += `</div>`;
+        });
+        document.getElementById('app').innerHTML = html;
+    }
+    window.onload = renderMatrix;
+</script>
+</body>
+</html>
