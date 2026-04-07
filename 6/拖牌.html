@@ -2,39 +2,59 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <title>539 拖牌分析</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #000; padding: 20px; display: flex; justify-content: center; }
-        .viewport { width: 1202px; height: 422px; background: #fff; position: relative; border: 1px solid #fff; }
-        
-        /* 物理死鎖線 */
-        .line-380 { position: absolute; bottom: 380px; width: 100%; border-top: 2px solid #000; z-index: 10; }
-        .line-20  { position: absolute; bottom: 20px; width: 100%; border-top: 1px solid #000; z-index: 10; }
-
-        /* 柱子區域 */
-        .chart-area { position: absolute; left: 200px; width: 780px; height: 400px; bottom: 0; display: flex; align-items: flex-end; }
-        .bar-wrap { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 400px; position: relative; }
-        
-        /* 柱體：直接從 0px 開始長，但會被 20px 線穿過 */
-        .pillar { width: 14px; margin: 0 auto; background: purple; position: relative; }
-        .is-max { background: red !important; }
-        
-        .count-txt { position: absolute; bottom: 100%; width: 100%; text-align: center; font-size: 9px; font-weight: bold; color: #000; }
-        .num-txt { height: 20px; line-height: 20px; text-align: center; font-size: 10px; font-weight: bold; background: #eee; border-top: 1px solid #000; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Consolas", "微軟正黑體"; }
+        body { background: #000; width: 1202px; margin: 0 auto; padding-top: 5px; }
+        .nav-bar { width: 1202px; display: flex; gap: 1px; margin-bottom: 2px; }
+        .nav-tab { flex: 1; padding: 10px 0; background: #333; color: #ccc; font-size: 12px; text-align: center; text-decoration: none; border: 1px solid #444; font-weight: bold; }
+        .nav-tab.active { background: #ff9900 !important; color: #000 !important; }
+        .viewport { width: 1202px; min-height: 442px; background: #fff; border: 1px solid #fff; display: flex; flex-direction: column; }
+        .info-head { background: #eee; padding: 10px; font-weight: bold; border-bottom: 2px solid #000; }
+        .res-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 20px; }
+        .res-card { border: 1px solid #ccc; padding: 10px; background: #fafafa; text-align: center; }
+        .ball { display: inline-block; width: 30px; height: 30px; background: #8B0000; color: #fff; border-radius: 50%; line-height: 30px; font-weight: bold; }
     </style>
+    <script src="https://88ll88.github.io/888/aaa.js"></script>
 </head>
 <body>
-
-<div class="viewport">
-    <div class="line-380"></div>
-    <div class="line-20"></div>
-    <div class="chart-area" id="stage"></div>
-</div>
-
-<script>
-    // 2007-2026 歷史真實總次數
-    const data = {
-        "01":742, "02":720, "03":755, "04":718, "05":782, "06":731, "07":710, "08":748, "09":761, "10":752,
+    <div class="nav-bar">
+        <a href="分佈圖.html" class="nav-tab">分佈圖</a>
+        <a href="柱狀圖.html" class="nav-tab">柱狀圖</a>
+        <a href="三分區.html" class="nav-tab">三分區</a>
+        <a href="拖牌.html" class="nav-tab active">拖牌</a>
+        <a href="遺漏.html" class="nav-tab">遺漏</a>
+        <a href="統計表.html" class="nav-tab">統計表</a>
+    </div>
+    <div class="viewport">
+        <div class="info-head" id="last-info">最新一期：加載中...</div>
+        <div class="res-grid" id="drag-res"></div>
+    </div>
+    <script>
+        window.onload = function() {
+            let last = aaa[0];
+            document.getElementById('last-info').innerText = `依據最新期號 [${last[1].join(', ')}] 分析歷史拖牌：`;
+            let stats = {};
+            last[1].forEach(n => {
+                let hitCount = 0;
+                for(let i=1; i<aaa.length; i++) {
+                    if(aaa[i][1].includes(n)) {
+                        aaa[i-1][1].forEach(nextN => {
+                            stats[nextN] = (stats[nextN] || 0) + 1;
+                        });
+                    }
+                }
+            });
+            let sorted = Object.entries(stats).sort((a,b) => b[1] - a[1]).slice(0, 10);
+            let html = '';
+            sorted.forEach(item => {
+                html += `<div class="res-card"><div class="ball">${item[0]}</div><br>出現 ${item[1]} 次</div>`;
+            });
+            document.getElementById('drag-res').innerHTML = html;
+        }
+    </script>
+</body>
+</html>        "01":742, "02":720, "03":755, "04":718, "05":782, "06":731, "07":710, "08":748, "09":761, "10":752,
         "11":739, "12":728, "13":741, "14":794, "15":712, "16":750, "17":737, "18":721, "19":785, "20":708,
         "21":744, "22":767, "23":753, "24":730, "25":749, "26":723, "27":771, "28":705, "29":812, "30":736,
         "31":742, "32":718, "33":760, "34":727, "35":755, "36":732, "37":709, "38":746, "39":720
