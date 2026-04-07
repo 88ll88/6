@@ -1,4 +1,75 @@
 <!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>539 三分區分析</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Consolas", "微軟正黑體"; }
+        body { background: #000; width: 1202px; margin: 0 auto; padding-top: 5px; overflow-x: hidden; }
+        .nav-bar { width: 1202px; display: flex; gap: 1px; margin-bottom: 2px; }
+        .nav-tab { flex: 1; padding: 10px 0; background: #333; color: #ccc; font-size: 12px; text-align: center; text-decoration: none; border: 1px solid #444; font-weight: bold; }
+        .nav-tab.active { background: #ff9900 !important; color: #000 !important; }
+        
+        .viewport { width: 1202px; background: #fff; border: 1px solid #fff; min-height: 442px; }
+        .row-head { display: flex; background: #444; color: #fff; height: 30px; line-height: 30px; font-size: 13px; font-weight: bold; text-align: center; }
+        .row-25 { display: flex; height: 25px; border-bottom: 1px solid #eee; align-items: center; font-size: 11px; }
+        
+        .c-date { width: 100px; border-right: 1px solid #ccc; text-align: center; }
+        .zone-box { width: 354px; display: flex; border-right: 2px solid #000; justify-content: space-evenly; }
+        .ball { width: 20px; height: 20px; text-align: center; line-height: 20px; border-radius: 50%; font-weight: bold; color: #ccc; }
+        
+        /* 三區顏色區分 */
+        .hit-1 { background: #FF0000; color: #fff; } /* 一區紅 */
+        .hit-2 { background: #0000BB; color: #fff; } /* 二區藍 */
+        .hit-3 { background: #8B0000; color: #fff; } /* 三區深紅 */
+    </style>
+    <script src="https://88ll88.github.io/888/aaa.js"></script>
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="分佈圖.html" class="nav-tab">分佈圖</a>
+        <a href="柱狀圖.html" class="nav-tab">柱狀圖</a>
+        <a href="三分區.html" class="nav-tab active">三分區</a>
+        <a href="拖牌.html" class="nav-tab">拖牌</a>
+        <a href="遺漏.html" class="nav-tab">遺漏</a>
+        <a href="統計表.html" class="nav-tab">統計表</a>
+    </div>
+
+    <div class="viewport" id="app">
+        <div class="row-head">
+            <div style="width:100px;">期次</div>
+            <div style="width:354px; border-right:2px solid #fff;">第一區 (01-13)</div>
+            <div style="width:354px; border-right:2px solid #fff;">第二區 (14-26)</div>
+            <div style="width:354px;">第三區 (27-39)</div>
+        </div>
+        <div id="data-list"></div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            let html = '';
+            for(let r=0; r<18; r++) {
+                let row = aaa[r];
+                let nums = row[1].map(Number);
+                let issue = row[0].match(/\(([^)]+)\)/)[1];
+                html += `<div class="row-25"><div class="c-date">${issue}</div>`;
+                
+                // 渲染三區
+                [[1,13,1], [14,26,2], [27,39,3]].forEach(z => {
+                    html += `<div class="zone-box">`;
+                    for(let i=z[0]; i<=z[1]; i++) {
+                        let isHit = nums.includes(i);
+                        html += `<div class="ball ${isHit?'hit-'+z[2]:''}">${i<10?'0'+i:i}</div>`;
+                    }
+                    html += `</div>`;
+                });
+                html += `</div>`;
+            }
+            document.getElementById('data-list').innerHTML = html;
+        }
+    </script>
+</body>
+</html><!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
