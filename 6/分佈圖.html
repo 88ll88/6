@@ -2,34 +2,38 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>分佈圖</title>
+    <title>539 分佈圖</title>
     <style>
+        /* 鎖定寬度與格線 */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Consolas", "微軟正黑體"; }
         body { background: #000; width: 1202px; margin: 0 auto; padding-top: 5px; }
         
         .nav-bar { width: 1202px; display: flex; gap: 1px; margin-bottom: 2px; }
-        .nav-tab { flex: 1; padding: 10px 0; background: #333; color: #ccc; font-size: 12px; text-align: center; text-decoration: none; border: 1px solid #444; font-weight: bold; }
-        .nav-tab.active { background: #ff9900 !important; color: #000 !important; }
+        .nav-tab { flex: 1; padding: 10px 0; background: #333; color: #ccc; font-size: 12px; text-align: center; text-decoration: none; border: 1px solid #444; }
+        .nav-tab.active { background: #ff9900 !important; color: #000 !important; font-weight: bold; }
 
-        .viewport { width: 1202px; background: #fff; overflow: hidden; border: 1px solid #666; }
+        .viewport { width: 1202px; background: #fff; border: 1px solid #666; }
         .grid-row { display: flex; height: 20px; border-bottom: 1px solid #ddd; align-items: center; }
-        .cell { width: 20px; height: 20px; border-right: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #333; }
+        .cell { width: 20px; height: 20px; border-right: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; }
         
-        .col-clickable { cursor: pointer; }
+        /* 欄位寬度鎖死 */
         .w-date { width: 100px; background: #fdfdfd; font-weight: bold; border-right: 2px solid #ccc; }
-        .w-nums { width: 100px; background: #fdfdfd; font-weight: bold; border-right: 2px solid #ccc; font-size: 10px; }
+        .w-nums { width: 100px; background: #fdfdfd; font-weight: bold; border-right: 2px solid #ccc; font-size: 10px; color: blue; }
         .w-balls { width: 780px; display: flex; }
         .w-index { width: 20px; background: #f0f0f0; }
 
+        /* 亮燈圓圈 */
         .lamp { width: 18px; height: 18px; border-radius: 50%; color: #fff; font-weight: bold; font-size: 10px; line-height: 18px; text-align: center; }
-        .lamp-red { background: #FF0000; }     /* 號碼 */
-        .lamp-blue { background: #0000BB; }    /* 遞增 */
-        .lamp-darkred { background: #8B0000; } /* 落球序 */
+        .lamp-red { background: #FF0000; }
+        .lamp-blue { background: #0000BB; }
+        .lamp-darkred { background: #8B0000; }
 
+        /* 黑色底部 */
         .footer-black { background: #000 !important; color: #fff !important; }
         .footer-black .cell { color: #fff; border-right: 1px solid #444; }
     </style>
-    <script src="https://88ll88.github.io/888/aaa.js"></script>
+
+    <script src="aaa.js"></script>
 </head>
 <body>
 
@@ -44,12 +48,10 @@
 
     <div class="viewport">
         <div class="grid-row" style="background:#eee; font-weight:bold;">
-            <div class="cell w-date col-clickable" onclick="toggleDate()" id="h-date">日期</div>
-            <div class="cell w-nums col-clickable" onclick="toggleSort()" id="h-sort">號碼紅圈</div>
+            <div class="cell w-date" onclick="toggleDate()" id="h-date">日期</div>
+            <div class="cell w-nums" onclick="toggleSort()" id="h-sort">號碼紅圈</div>
             <div class="w-balls">
-                <script>
-                    for(let i=1; i<=39; i++) document.write(`<div class="cell">${i<10?'0'+i:i}</div>`);
-                </script>
+                <script>for(let i=1; i<=39; i++) document.write(`<div class="cell">${i<10?'0'+i:i}</div>`);</script>
             </div>
             <div class="cell w-index">#</div>
         </div>
@@ -58,7 +60,7 @@
 
 <script>
     let isIssueMode = false; 
-    let sortMode = 0; // 0:紅圈, 1:深藍圈, 2:深紅圈
+    let sortMode = 0; 
     const modes = [
         { label: "號碼紅圈", color: "lamp-red" },
         { label: "遞增深藍", color: "lamp-blue" },
@@ -69,6 +71,12 @@
     function toggleSort() { sortMode = (sortMode + 1) % 3; render(); }
 
     function render() {
+        const container = document.getElementById('data-container');
+        if (typeof aaa === 'undefined') {
+            container.innerHTML = '<div style="color:red; padding:20px;">找不到 aaa.js 數據，請確認檔案在同資料夾。</div>';
+            return;
+        }
+
         document.getElementById('h-date').innerText = isIssueMode ? "期次" : "日期";
         document.getElementById('h-sort').innerText = modes[sortMode].label;
 
@@ -76,38 +84,29 @@
         for (let r = 0; r < 20; r++) {
             if (!aaa[r]) break;
             
-            // 1. 日期/期次切換
+            // 抓取對應欄位
             let displayDate = isIssueMode ? aaa[r][2] : aaa[r][0].split('(')[0];
-            
-            // 2. 號碼欄切換模式
-            // sortMode 0 & 1 用遞增(aaa[r][1]), 模式 2 用落球序(aaa[r][3])
-            let currentNums = (sortMode === 2) ? aaa[r][3] : aaa[r][1];
-            let displayNums = currentNums.join(',');
+            let currentNums = (sortMode === 2) ? (aaa[r][3] || aaa[r][1]) : aaa[r][1];
 
             html += `<div class="grid-row">`;
-            html += `<div class="cell w-date col-clickable" onclick="toggleDate()">${displayDate}</div>`;
-            html += `<div class="cell w-nums col-clickable" onclick="toggleSort()" style="color:blue;">${displayNums}</div>`;
-            
+            html += `<div class="cell w-date" onclick="toggleDate()">${displayDate}</div>`;
+            html += `<div class="cell w-nums" onclick="toggleSort()">${currentNums.join(',')}</div>`;
             html += `<div class="w-balls">`;
             for (let i = 1; i <= 39; i++) {
-                let ballStr = i < 10 ? '0' + i : '' + i;
-                // 燈亮不亮永遠根據當前開出的號碼 (aaa[r][1])
-                let isHit = aaa[r][1].includes(ballStr);
-                html += `<div class="cell">${isHit ? `<div class="lamp ${modes[sortMode].color}">${ballStr}</div>` : r+1}</div>`;
+                let b = i < 10 ? '0' + i : '' + i;
+                let isHit = aaa[r][1].includes(b);
+                // 號碼球區點擊也能切換
+                html += `<div class="cell" onclick="toggleSort()">${isHit ? `<div class="lamp ${modes[sortMode].color}">${b}</div>` : r+1}</div>`;
             }
-            html += `</div>`;
-            html += `<div class="cell w-index">${r+1}</div>`;
-            html += `</div>`;
+            html += `</div><div class="cell w-index">${r+1}</div></div>`;
         }
 
         // 黑尾列
-        html += `<div class="grid-row footer-black">`;
-        html += `<div class="cell w-date">[]</div><div class="cell w-nums">[]</div>`;
-        html += `<div class="w-balls">`;
+        html += `<div class="grid-row footer-black"><div class="cell w-date">[]</div><div class="cell w-nums">[]</div><div class="w-balls">`;
         for (let i = 1; i <= 39; i++) html += `<div class="cell">[]</div>`;
         html += `</div><div class="cell w-index">[]</div></div>`;
 
-        document.getElementById('data-container').innerHTML = html;
+        container.innerHTML = html;
     }
 
     window.onload = render;
