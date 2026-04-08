@@ -2,31 +2,35 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>539 分佈圖</title>
+    <title>539 分佈圖 - 導航全黑版</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Consolas", "微軟正黑體"; }
-        body { background: #000; width: 1200px; margin: 0 auto; padding-top: 5px; }
+        /* 頁面大底白色，確保縫隙是白的 */
+        body { background: #fff; width: 1200px; margin: 0 auto; padding-top: 5px; }
         
-        .nav-bar { width: 1200px; display: flex; gap: 1px; margin-bottom: 2px; }
-        .nav-tab { flex: 1; padding: 10px 0; background: #333; color: #ccc; font-size: 12px; text-align: center; text-decoration: none; border: 1px solid #444; }
-        .nav-tab.active { background: #ff9900 !important; color: #000 !important; font-weight: bold; }
+        /* 💡 導航列改為全黑底 */
+        .nav-bar { width: 1200px; display: flex; gap: 1px; margin-bottom: 2px; background: #000; padding: 1px; }
+        .nav-tab { flex: 1; padding: 10px 0; background: #222; color: #fff; font-size: 12px; text-align: center; text-decoration: none; border: 1px solid #444; }
+        .nav-tab.active { background: #ff9900 !important; color: #000 !important; font-weight: bold; border: 1px solid #fff; }
 
         .viewport { width: 1200px; background: #fff; border: 1px solid #666; }
         .grid-row { display: flex; height: 20px; border-bottom: 1px solid #ddd; align-items: center; }
         
-        /* 基礎單元格：預設黑底白字白框 */
+        /* 單元格基礎：黑底白字白框 (用於表頭、尾列、右欄) */
         .cell { height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; 
                 background: #000; color: #fff; border-right: 1px solid #fff; }
         
-        /* 寬度定義 */
+        /* 寬度精確定義 */
         .w-100 { width: 100px; }
         .w-780 { width: 780px; display: flex; }
         .w-20  { width: 20px; }
         .w-200 { width: 200px; }
 
-        /* 數據區中間的白色背景 (覆蓋黑底) */
-        .data-row .w-100, .data-row .w-20 { background: #fdfdfd; color: #333; border-right: 1px solid #eee; }
-        .data-row .w-780 .cell { background: #fff; color: #333; border-right: 1px solid #eee; }
+        /* 數據區：中間白底 */
+        .data-row { background: #fff !important; }
+        .data-row .cell { background: #fff; color: #333; border-right: 1px solid #eee; }
+        /* 數據區最右邊兩格維持黑底 */
+        .data-row .w-index, .data-row .w-remark { background: #000 !important; color: #fff !important; border-right: 1px solid #fff !important; }
 
         /* 亮燈圓圈 */
         .lamp { width: 18px; height: 18px; border-radius: 50%; color: #fff; font-weight: bold; font-size: 10px; line-height: 18px; text-align: center; }
@@ -34,7 +38,6 @@
         .lamp-blue { background: #0000BB; }
         .lamp-darkred { background: #8B0000; }
 
-        /* 尾列文字靠右 */
         .text-right { justify-content: flex-end; padding-right: 10px; }
     </style>
 
@@ -68,6 +71,20 @@
         </div>
         
         <div id="data-container"></div>
+
+        <div class="grid-row">
+            <div class="cell w-200 text-right">號碼</div>
+            <div class="w-780">
+                <script>
+                    for(let i=1; i<=39; i++) {
+                        let num = i < 10 ? '0' + i : i;
+                        document.write(`<div class="cell w-20">${num}</div>`);
+                    }
+                </script>
+            </div>
+            <div class="cell w-20"></div>
+            <div class="cell w-200"></div>
+        </div>
     </div>
 
 <script>
@@ -90,7 +107,6 @@
         document.getElementById('h-sort').innerText = modes[sortMode].label;
 
         let html = '';
-        // 渲染 20 行數據
         for (let r = 0; r < 20; r++) {
             if (!aaa[r]) break;
             let displayDate = isIssueMode ? aaa[r][2] : aaa[r][0].split('(')[0];
@@ -105,25 +121,10 @@
                 let isHit = aaa[r][1].includes(b);
                 html += `<div class="cell w-20" onclick="toggleSort()">${isHit ? `<div class="lamp ${modes[sortMode].color}">${b}</div>` : r+1}</div>`;
             }
-            html += `</div><div class="cell w-20">${r+1}</div><div class="cell w-200"></div></div>`;
+            html += `</div><div class="cell w-20 w-index">${r+1}</div><div class="cell w-200 w-remark"></div></div>`;
         }
-
-        // 下方尾列
-        html += `<div class="grid-row">`;
-        html += `<div class="cell w-200 text-right">號碼</div>`; // 100+100=200
-        html += `<div class="w-780">`;
-        for (let i = 1; i <= 39; i++) {
-            let num = i < 10 ? '0' + i : i;
-            html += `<div class="cell w-20">${num}</div>`;
-        }
-        html += `</div>`;
-        html += `<div class="cell w-20"></div>`; // 20 空白
-        html += `<div class="cell w-200"></div>`; // 200 空白
-        html += `</div>`;
-
         container.innerHTML = html;
     }
-
     window.onload = render;
 </script>
 </body>
