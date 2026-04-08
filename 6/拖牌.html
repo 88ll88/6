@@ -5,16 +5,42 @@
     <title>539 拖牌分析</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Consolas", "微軟正黑體"; }
-        body { background: #000; width: 1202px; margin: 0 auto; padding-top: 5px; overflow-x: hidden; }
-        .nav-bar { width: 1202px; display: flex; gap: 1px; margin-bottom: 2px; }
-        .nav-tab { flex: 1; padding: 10px 0; background: #333; color: #ccc; font-size: 12px; text-align: center; text-decoration: none; border: 1px solid #444; font-weight: bold; }
-        .nav-tab.active { background: #ff9900 !important; color: #000 !important; }
-        .viewport { width: 1202px; background: #fff; border: 1px solid #fff; min-height: 442px; padding: 20px; }
-        .ball { display: inline-block; width: 35px; height: 35px; background: #8B0000; color: #fff; border-radius: 50%; line-height: 35px; text-align: center; font-weight: bold; margin: 10px; }
+        body { background: #fff; width: 1200px; margin: 0 auto; padding-top: 5px; }
+        
+        .nav-bar { width: 1200px; display: flex; gap: 1px; margin-bottom: 2px; background: #000; padding: 1px; }
+        .nav-tab { flex: 1; padding: 10px 0; background: #222; color: #fff; font-size: 12px; text-align: center; text-decoration: none; border: 1px solid #444; }
+        .nav-tab.active { background: #ff9900 !important; color: #000 !important; font-weight: bold; }
+
+        .viewport { width: 1200px; background: #fff; border: 1px solid #666; }
+        .grid-row { display: flex; height: 20px; align-items: center; border-bottom: 1px solid #eee; overflow: hidden; }
+        .cell { height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; border-right: 1px solid #eee; flex-shrink: 0; }
+        
+        /* 寬度與點擊手勢 */
+        .w-idx { width: 100px; cursor: pointer; user-select: none; }
+        .w-nums { width: 100px; cursor: pointer; user-select: none; }
+        .w-logic { width: 400px; justify-content: flex-start; padding-left: 10px; }
+        .w-result { width: 400px; justify-content: flex-start; padding-left: 10px; }
+        .w-rem { width: 200px; border-right: none; }
+
+        .bg-black { background: #000 !important; color: #fff !important; }
+        
+        /* 號碼球 */
+        .ball { width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; margin: 0 1px; }
+        .ball-red { background: #FF0000; }
+        .ball-blue { background: #000088; }
+        .ball-darkred { background: #880000; }
+
+        /* 文字樣式 */
+        .item-group { font-weight: bold; margin-right: 8px; font-size: 12px; }
+        .c-red { color: #FF0000; }     
+        .c-blue { color: #0000FF; }    
+        .c-green { color: #008800; }   
+        .c-gray { color: #888888; font-weight: normal; } 
     </style>
-    <script src="https://88ll88.github.io/888/aaa.js"></script>
+    <script src="aaa.js"></script>
 </head>
 <body>
+
     <div class="nav-bar">
         <a href="分佈圖.html" class="nav-tab">分佈圖</a>
         <a href="柱狀圖.html" class="nav-tab">柱狀圖</a>
@@ -23,20 +49,106 @@
         <a href="遺漏.html" class="nav-tab">遺漏</a>
         <a href="統計表.html" class="nav-tab">統計表</a>
     </div>
-    <div class="viewport" id="res">正在大數據分析歷史拖牌...</div>
-    <script>
-        window.onload = function(){
-            let last = aaa[0][1], stats = {};
-            last.forEach(n => {
-                for(let i=1; i<aaa.length; i++){
-                    if(aaa[i][1].includes(n)) aaa[i-1][1].forEach(nxt => stats[nxt] = (stats[nxt]||0)+1);
-                }
-            });
-            let sorted = Object.entries(stats).sort((a,b)=>b[1]-a[1]).slice(0,10);
-            let h = '<h3>最新號碼拖出機率最高：</h3>';
-            sorted.forEach(x => h += `<div style="display:inline-block;text-align:center"><div class="ball">${x[0]}</div><br><b>${x[1]}次</b></div>`);
-            document.getElementById('res').innerHTML = h;
+
+    <div class="viewport">
+        <div class="grid-row bg-black">
+            <div class="cell w-idx" onclick="rotateIdx()" id="head-idx">期次</div>
+            <div class="cell w-nums" onclick="rotateNums()" id="head-nums">號碼</div>
+            <div class="cell w-logic">拖牌號碼(紅5+綠)</div>
+            <div class="cell w-result">結果T(F)</div>
+            <div class="cell w-rem">備註</div>
+        </div>
+        <div id="main-content"></div>
+    </div>
+
+<script>
+    let idxMode = 0; // 0:期次, 1:日期
+    let numMode = 0; // 0:號碼(紅), 1:遞增(藍), 2:落球(深紅)
+
+    function rotateIdx() {
+        idxMode = (idxMode + 1) % 2;
+        render();
+    }
+
+    function rotateNums() {
+        numMode = (numMode + 1) % 3;
+        render();
+    }
+
+    function getTopTwo(singleNum, untilIndex) {
+        let stats = Array(40).fill(0);
+        for (let i = untilIndex + 1; i < aaa.length; i++) {
+            if (aaa[i][1].includes(singleNum)) {
+                aaa[i-1][1].forEach(n => stats[parseInt(n)]++);
+            }
         }
-    </script>
+        let list = stats.map((v, i) => ({ n: i < 10 ? '0'+i : ''+i, v }))
+                        .slice(1)
+                        .sort((a, b) => b.v - a.v);
+        return { f1: list[0], f2: list[1], from: singleNum };
+    }
+
+    function render() {
+        if (typeof aaa === 'undefined') return;
+        
+        // 更新表頭文字
+        document.getElementById('head-idx').innerText = (idxMode === 0) ? "期次" : "日期";
+        document.getElementById('head-nums').innerText = ["號碼", "遞增", "落球序"][numMode];
+
+        const container = document.getElementById('main-content');
+        let html = '';
+
+        for (let i = 0; i < 50; i++) {
+            let row = aaa[i];
+            let dateStr = row[0].split('(')[0];
+            let snStr = (aaa.length - i).toString().padStart(4, '0');
+            
+            // 號碼顯示邏輯
+            let displayNums = (numMode === 1) ? [...row[1]].sort() : row[1];
+            let ballCls = (numMode === 0) ? "ball-red" : (numMode === 1 ? "ball-blue" : "ball-darkred");
+            let ballsHtml = displayNums.map(n => `<span class="ball ${ballCls}">${n}</span>`).join('');
+
+            // 拖牌計算
+            let groupStats = row[1].map(n => getTopTwo(n, i));
+            let maxF2 = Math.max(...groupStats.map(g => g.f2.v));
+            let greenItems = groupStats.filter(g => g.f2.v === maxF2);
+
+            const format = (num, from, c) => `<span class="item-group"><span class="${c}">${num}</span><span class="c-gray">(${from})</span></span>`;
+
+            // 拖牌欄
+            let logicHtml = groupStats.map(g => format(g.f1.n, g.from, "c-red")).join('');
+            greenItems.forEach(g => { if(g.f2.v > 0) logicHtml += format(g.f2.n, g.from, "c-green"); });
+
+            // 結果欄
+            let resHtml = "";
+            if (i === 0) {
+                resHtml = '<span style="color:red; font-weight:bold;">尚未開獎</span>';
+            } else {
+                let nextDraw = aaa[i-1][1];
+                let hits = [];
+                groupStats.forEach(g => {
+                    if (nextDraw.includes(g.f1.n)) hits.push(format(g.f1.n, g.from, "c-blue"));
+                });
+                greenItems.forEach(g => {
+                    if (nextDraw.includes(g.f2.n)) hits.push(format(g.f2.n, g.from, "c-green"));
+                });
+                resHtml = [...new Set(hits)].join('');
+            }
+
+            // 在每一列的 cell 也加上 onclick，達成整欄點擊效果
+            html += `
+                <div class="grid-row">
+                    <div class="cell w-idx" onclick="rotateIdx()">${(idxMode === 0) ? snStr : dateStr}</div>
+                    <div class="cell w-nums" onclick="rotateNums()">${ballsHtml}</div>
+                    <div class="cell w-logic">${logicHtml}</div>
+                    <div class="cell w-result">${resHtml}</div>
+                    <div class="cell w-rem"></div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+    window.onload = render;
+</script>
 </body>
 </html>
