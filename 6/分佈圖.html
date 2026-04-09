@@ -45,11 +45,12 @@
 <body>
 
     <div class="nav-bar">
-        <a href="分佈圖.html" class="nav-tab">分佈圖</a>
-        <a href="柱狀圖.html" class="nav-tab active">柱狀圖</a>
+        <a href="分佈圖.html" class="nav-tab active">分佈圖</a>
+        <a href="柱狀圖.html" class="nav-tab">柱狀圖</a>
         <a href="三分區.html" class="nav-tab">三分區</a>
         <a href="拖牌.html" class="nav-tab">拖牌</a>
         <a href="遺漏.html" class="nav-tab">遺漏</a>
+        <a href="統計表.html" class="nav-tab">統計表</a>
     </div>
 
     <div class="viewport">
@@ -68,7 +69,7 @@
     function getStats(targetNum) {
         let stats = Array(40).fill(0);
         for (let i = 1; i < aaa.length; i++) {
-            if (aaa[i][1].includes(targetNum)) {
+            if (aaa[i][1].includ"es(targetNum)) {
                 aaa[i-1][1].forEach(winN => stats[parseInt(winN)]++);
             }
         }
