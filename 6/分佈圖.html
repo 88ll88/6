@@ -2,11 +2,12 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>539 分佈圖 - 統計圖切換版</title>
+    <title>539 分佈圖 - 次數常駐版</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Consolas", "微軟正黑體"; }
         body { background: #f4f4f4; width: 1200px; margin: 0 auto; padding-top: 5px; }
         
+        /* 寬度定義 */
         .w-100 { width: 100px; flex-shrink: 0; }
         .w-780 { width: 780px; flex-shrink: 0; display: flex; }
         .w-20 { width: 20px; flex-shrink: 0; text-align: center; }
@@ -20,6 +21,7 @@
         .row-black { background: #000; color: #fff; font-size: 12px; font-weight: bold; height: 20px; line-height: 18px; display: flex; }
         .cell-border { border: 1px solid #fff; }
 
+        /* 捲軸區 */
         .scroll-area { height: 400px; overflow-y: scroll; background: #fff; border-bottom: 2px solid #000; }
         .row-data { display: flex; height: 20px; line-height: 20px; border-bottom: 1px solid #ddd; font-size: 11px; }
         .c-date, .c-nums { width: 100px; border-right: 1px solid #ddd; text-align: center; cursor: pointer; flex-shrink: 0; }
@@ -35,20 +37,18 @@
 
         .c-sharp { width: 20px; border-right: 1px solid #ddd; text-align: center; flex-shrink: 0; background: #f9f9f9; font-weight: bold; }
 
-        /* 統計與圖表區域 - 增加一個切換用的 ID */
-        #stat-panel { display: block; }
-        .row-stat { background: #e0e0e0; height: 20px; line-height: 20px; display: flex; font-size: 12px; font-weight: bold; border-bottom: 1px solid #000; }
-        .stat-label { width: 200px; display: flex; justify-content: space-between; padding: 0 5px; flex-shrink: 0; color: #000; }
+        /* 第 21 列：常駐統計次數 */
+        .row-stat { background: #e0e0e0; height: 20px; line-height: 20px; display: flex; font-size: 12px; font-weight: bold; border-bottom: 1px solid #000; color: #000; }
+        .stat-label { width: 200px; display: flex; justify-content: space-between; padding: 0 5px; flex-shrink: 0; }
 
+        /* 第 22 列：可切換柱狀圖 */
+        #chart-panel { display: block; }
         .row-chart { height: 100px; display: flex; background: #fff; border-bottom: 1px solid #000; }
         .chart-main { width: 780px; height: 100px; position: relative; border-left: 1px solid #000; border-right: 1px solid #000; flex-shrink: 0; }
         .bar { position: absolute; bottom: 0; width: 14px; background: #800080; z-index: 10; border: 1px solid #fff; }
         .line-red { position: absolute; left: 0; width: 100%; border-top: 1px dashed red; z-index: 5; }
 
-        /* 底部點擊區域 */
-        .footer-clickable { cursor: pointer; transition: background 0.2s; }
-        .footer-clickable:hover { background: #333 !important; }
-
+        .footer-clickable { cursor: pointer; }
         .pointer { cursor: pointer; }
     </style>
     <script src="aaa.js"></script>
@@ -74,17 +74,17 @@
 
         <div class="scroll-area" id="main-content"></div>
 
-        <div id="stat-panel">
-            <div class="row-stat">
-                <div class="stat-label">
-                    <span id="stat-total">共?期</span>
-                    <span id="stat-max-label">次數 0</span>
-                </div>
-                <div class="w-780" id="stat-cells"></div>
-                <div class="w-20"></div>
-                <div class="w-200"></div>
+        <div class="row-stat">
+            <div class="stat-label">
+                <span id="stat-total">共?期</span>
+                <span id="stat-max-label">次數 0</span>
             </div>
+            <div class="w-780" id="stat-cells"></div>
+            <div class="w-20"></div>
+            <div class="w-200"></div>
+        </div>
 
+        <div id="chart-panel">
             <div class="row-chart">
                 <div class="w-200" style="background:#fff;"></div>
                 <div class="chart-main" id="chart-area"></div>
@@ -92,8 +92,8 @@
             </div>
         </div>
 
-        <div class="row-black footer-clickable" style="margin-top:2px;" onclick="toggleChart()">
-            <div class="cell-border w-200" style="text-align:right; padding-right:10px;">號碼 (點擊開關統計圖)</div>
+        <div class="row-black footer-clickable" style="margin-top:2px;" onclick="toggleOnlyChart()">
+            <div class="cell-border w-200" style="text-align:right; padding-right:10px;">號碼 (點擊開關柱狀圖)</div>
             <div class="w-780" id="footer-0139"></div>
             <div class="cell-border w-220"></div>
         </div>
@@ -104,14 +104,10 @@
     let sortMode = 0; 
     const displayCount = 30;
 
-    // 隱藏/顯示柱狀圖邏輯
-    function toggleChart() {
-        const panel = document.getElementById('stat-panel');
-        if (panel.style.display === 'none') {
-            panel.style.display = 'block';
-        } else {
-            panel.style.display = 'none';
-        }
+    // 只切換柱狀圖顯示狀態
+    function toggleOnlyChart() {
+        const panel = document.getElementById('chart-panel');
+        panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
     }
 
     function toggleDateMode() { dateMode = 1 - dateMode; render(); }
@@ -154,6 +150,7 @@
         });
         container.innerHTML = html;
 
+        // 更新統計數據 (21列)
         const maxC = Math.max(...counts.slice(1)) || 1;
         document.getElementById('stat-total').innerText = `共${displayCount}期`;
         document.getElementById('stat-max-label').innerText = `次數 ${maxC}`;
@@ -161,6 +158,7 @@
             `<div class="ball-slot" style="border-right:1px solid #bbb; color:#000;">${c > 0 ? c : ''}</div>`
         ).join('');
 
+        // 更新柱狀圖 (22列)
         const chartArea = document.getElementById('chart-area');
         let chartHtml = `<div class="line-red" style="bottom: 80px;"></div>`;
         counts.slice(1).forEach((val, idx) => {
