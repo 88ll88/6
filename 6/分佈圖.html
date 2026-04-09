@@ -2,11 +2,17 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>539 分佈圖 - 整欄切換校準</title>
+    <title>539 分佈圖 - 完整導覽版</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Consolas", "微軟正黑體"; }
         body { background: #f4f4f4; width: 1200px; margin: 0 auto; padding-top: 5px; }
         
+        /* 導覽列樣式 */
+        .nav-bar { width: 1200px; display: flex; gap: 1px; margin-bottom: 2px; background: #000; padding: 1px; }
+        .nav-tab { flex: 1; padding: 10px 0; background: #222; color: #fff; font-size: 13px; text-align: center; text-decoration: none; border: 1px solid #444; cursor: pointer; }
+        .nav-tab:hover { background: #333; }
+        .nav-tab.active { background: #ff9900 !important; color: #000 !important; font-weight: bold; }
+
         .w-100 { width: 100px; flex-shrink: 0; }
         .w-780 { width: 780px; flex-shrink: 0; display: flex; }
         .w-20 { width: 20px; flex-shrink: 0; }
@@ -27,10 +33,10 @@
         .ball-red { background: #ff0000; }
         .ball-blue { background: #00008b; }
 
-        /* 近期次數列：1200px 整列點擊有效 */
+        /* 近期次數列：1200px */
         .row-period { background: #fdf2d0; height: 20px; line-height: 20px; display: flex; font-size: 11px; font-weight: bold; border-bottom: 1px solid #999; cursor: pointer; width: 1200px; }
         
-        /* 歷史統計列：鎖定 1000px 到 # 號 */
+        /* 歷史統計列：鎖定 1000px */
         .row-history { background: #e0e0e0; height: 20px; line-height: 20px; display: flex; font-size: 9px; font-weight: bold; border-bottom: 1px solid #000; width: 1000px; }
         .label-zone { width: 200px; border-right: 1px solid #999; flex-shrink: 0; text-align: center; }
 
@@ -47,14 +53,15 @@
     <script src="aaa.js"></script>
 </head>
 <body>
-    <div class="nav-bar">
-        <a href="分佈圖.html" class="nav-tab active">分佈圖</a>
-        <a href="柱狀圖.html" class="nav-tab">柱狀圖</a>
-        <a href="三分區.html" class="nav-tab">三分區</a>
-        <a href="拖牌.html" class="nav-tab">拖牌</a>
-        <a href="遺漏.html" class="nav-tab">遺漏</a>
-        <a href="統計表.html" class="nav-tab">統計表</a>
-    </div>
+
+<div class="nav-bar">
+    <div class="nav-tab active">分佈圖</div>
+    <div class="nav-tab" onclick="toggleChart()">柱狀圖</div>
+    <div class="nav-tab">三分區</div>
+    <div class="nav-tab">拖牌</div>
+    <div class="nav-tab">遺漏</div>
+</div>
+
 <div class="viewport">
     <div class="row-black">
         <div id="head-date" class="cell-border w-100 flex-center pointer" onclick="toggleDateMode()">日期</div>
@@ -97,8 +104,7 @@
 </div>
 
 <script>
-    let dateMode = 0; 
-    let sortMode = 0; 
+    let dateMode = 0, sortMode = 0;
     const pSteps = [30, 50, 80, 100, 150, 200];
     let pIdx = 0;
     let hCounts = Array(40).fill(0);
@@ -119,7 +125,6 @@
         p.style.display = (p.style.display === 'none') ? 'flex' : 'none';
     }
 
-    // 模式切換
     function toggleDateMode() { dateMode = 1 - dateMode; render(); }
     function toggleSortMode() { sortMode = (sortMode + 1) % 3; render(); }
 
@@ -131,7 +136,6 @@
         let pCounts = Array(40).fill(0);
         aaa.slice(0, curP).forEach(r => r[1].forEach(n => pCounts[parseInt(n)]++));
 
-        // 表頭文字
         const sortLabels = ["號碼", "遞增", "落球序"];
         document.getElementById('head-sort').innerText = sortLabels[sortMode];
         document.getElementById('head-date').innerText = (dateMode === 0) ? "日期" : "期次";
@@ -139,13 +143,10 @@
         let dataHtml = '';
         aaa.slice(0, 30).forEach((row, i) => {
             const win = row[1];
-            
-            // 模式邏輯
             let display = (sortMode === 0) ? [...win] : (sortMode === 1 ? [...win].sort((a,b)=>a-b) : [...row[3]]);
             let dateVal = (dateMode === 0) ? row[0] : row[2];
             let ballCls = (sortMode === 0) ? "ball-darkred" : (sortMode === 1 ? "ball-red" : "ball-blue");
             
-            // 關鍵修正：給 w-100 的欄位加上 onclick，實現整欄點擊切換
             dataHtml += `<div class="row-data">
                 <div class="w-100 flex-center pointer" style="border-right:1px solid #ddd;" onclick="toggleDateMode()">${dateVal}</div>
                 <div class="w-100 flex-center pointer" style="border-right:1px solid #000; font-weight:bold;" onclick="toggleSortMode()">${display.join(',')}</div>
@@ -159,7 +160,6 @@
         });
         document.getElementById('main-content').innerHTML = dataHtml;
 
-        // 次數與圖表
         document.getElementById('period-cells').innerHTML = pCounts.slice(1).map(c => `<div class="ball-slot" style="border-right:1px solid #ccc;">${c||''}</div>`).join('');
         document.getElementById('stat-cells').innerHTML = hCounts.slice(1).map(c => `<div class="ball-slot" style="border-right:1px solid #999; color:#c00;">${c}</div>`).join('');
         
