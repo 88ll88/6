@@ -2,34 +2,70 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>539 分佈圖 - 數據對齊版</title>
+    <title>539 分佈圖 - 完美對齊版</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Consolas", "微軟正黑體"; }
-        body { background: #000; width: 1202px; margin: 0 auto; padding-top: 5px; }
+        body { background: #f4f4f4; width: 1200px; margin: 0 auto; padding-top: 5px; }
         
-        .nav-bar { width: 1202px; display: flex; gap: 1px; margin-bottom: 2px; }
-        .nav-tab { flex: 1; padding: 10px 0; background: #333; color: #ccc; font-size: 12px; text-align: center; text-decoration: none; border: 1px solid #444; font-weight: bold; }
-        .nav-tab.active { background: #ff9900 !important; color: #000 !important; }
+        /* 1. 寬度核心鎖定 (關鍵) */
+        .w-100 { width: 100px; flex-shrink: 0; }
+        .w-780 { width: 780px; flex-shrink: 0; display: flex; }
+        .w-20 { width: 20px; flex-shrink: 0; text-align: center; }
+        .w-200 { width: 200px; flex-shrink: 0; }
 
-        .viewport { width: 1202px; background: #fff; overflow: hidden; border: 1px solid #666; }
-        .grid-row { display: flex; height: 20px; border-bottom: 1px solid #ddd; align-items: center; }
-        .cell { width: 20px; height: 20px; border-right: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #333; }
+        /* 導覽列 */
+        .nav-bar { width: 1200px; display: flex; gap: 1px; margin-bottom: 2px; background: #000; padding: 1px; }
+        .nav-tab { flex: 1; padding: 10px 0; background: #222; color: #fff; font-size: 12px; text-align: center; text-decoration: none; border: 1px solid #444; }
+        .nav-tab.active { background: #ff9900 !important; color: #000 !important; font-weight: bold; }
+
+        .viewport { width: 1200px; border: 1px solid #000; background: #fff; }
         
-        .col-clickable { cursor: pointer; }
-        .w-date { width: 100px; background: #fdfdfd; font-weight: bold; border-right: 2px solid #ccc; }
-        .w-nums { width: 100px; background: #fdfdfd; font-weight: bold; border-right: 2px solid #ccc; font-size: 10px; }
-        .w-balls { width: 780px; display: flex; }
-        .w-index { width: 20px; background: #f0f0f0; }
+        /* 黑首/尾列 */
+        .row-black { background: #000; color: #fff; font-size: 12px; font-weight: bold; height: 20px; line-height: 18px; display: flex; }
+        .cell-border { border: 1px solid #fff; }
 
-        .lamp { width: 18px; height: 18px; border-radius: 50%; color: #fff; font-weight: bold; font-size: 10px; line-height: 18px; text-align: center; }
-        .lamp-red { background: #FF0000; }     /* 號碼 */
-        .lamp-blue { background: #0000BB; }    /* 遞增 */
-        .lamp-darkred { background: #8B0000; } /* 落球序 */
+        /* 捲軸區容器 */
+        .scroll-area { 
+            height: 400px; 
+            overflow-y: scroll; 
+            background: #fff; 
+            border-bottom: 2px solid #000; 
+        }
+        
+        .row-data { display: flex; height: 20px; line-height: 20px; border-bottom: 1px solid #ddd; font-size: 11px; }
+        .c-date, .c-nums { width: 100px; border-right: 1px solid #ddd; text-align: center; cursor: pointer; flex-shrink: 0; }
+        .c-nums { border-right: 1px solid #000; font-weight: bold; }
 
-        .footer-black { background: #000 !important; color: #fff !important; }
-        .footer-black .cell { color: #fff; border-right: 1px solid #444; }
+        /* 主區號碼球格 */
+        .ball-zone { width: 780px; display: flex; flex-shrink: 0; }
+        .ball-slot { 
+            width: 20px; height: 20px; 
+            border-right: 1px solid #eee; 
+            display: flex; align-items: center; justify-content: center; 
+            flex-shrink: 0; 
+        }
+        .ball { width: 18px; height: 18px; border-radius: 50%; color: #fff; font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+        
+        .ball-darkred { background: #8b0000; } 
+        .ball-red { background: #ff0000; }
+        .ball-blue { background: #00008b; }
+
+        /* [#] 欄位 */
+        .c-sharp { width: 20px; border-right: 1px solid #ddd; text-align: center; flex-shrink: 0; background: #f9f9f9; font-weight: bold; }
+
+        /* 下方統計列 */
+        .row-stat { background: #e0e0e0; height: 20px; line-height: 20px; display: flex; font-size: 12px; font-weight: bold; border-bottom: 1px solid #000; }
+        .stat-label { width: 200px; display: flex; justify-content: space-between; padding: 0 5px; flex-shrink: 0; }
+
+        /* 柱狀圖 */
+        .row-chart { height: 100px; display: flex; background: #fff; border-bottom: 1px solid #000; }
+        .chart-main { width: 780px; height: 100px; position: relative; border-left: 1px solid #000; border-right: 1px solid #000; flex-shrink: 0; }
+        .bar { position: absolute; bottom: 0; width: 14px; background: #800080; z-index: 10; border: 1px solid #fff; }
+        .line-red { position: absolute; left: 0; width: 100%; border-top: 1px dashed red; z-index: 5; }
+
+        .pointer { cursor: pointer; }
     </style>
-    <script src="https://88ll88.github.io/888/aaa.js"></script>
+    <script src="aaa.js"></script>
 </head>
 <body>
 
@@ -43,72 +79,108 @@
     </div>
 
     <div class="viewport">
-        <div class="grid-row" style="background:#eee; font-weight:bold;">
-            <div class="cell w-date col-clickable" onclick="toggleDate()" id="h-date">日期</div>
-            <div class="cell w-nums col-clickable" onclick="toggleSort()" id="h-sort">號碼紅圈</div>
-            <div class="w-balls">
-                <script>
-                    for(let i=1; i<=39; i++) document.write(`<div class="cell">${i<10?'0'+i:i}</div>`);
-                </script>
-            </div>
-            <div class="cell w-index">#</div>
+        <div class="row-black">
+            <div id="head-date" class="cell-border w-100 pointer" onclick="toggleDateMode()">日期</div>
+            <div id="head-sort" class="cell-border w-100 pointer" onclick="toggleSortMode()">號碼</div>
+            <div class="w-780" id="header-0139"></div>
+            <div class="cell-border w-20">#</div>
+            <div class="cell-border w-200">Right</div>
         </div>
-        <div id="data-container"></div>
+
+        <div class="scroll-area" id="main-content"></div>
+
+        <div class="row-stat">
+            <div class="stat-label">
+                <span id="stat-total">共?期</span>
+                <span id="stat-max-label">次數 0</span>
+            </div>
+            <div class="w-780" id="stat-cells"></div>
+            <div class="w-20"></div>
+            <div class="w-200"></div>
+        </div>
+
+        <div class="row-chart">
+            <div class="w-200" style="background:#fff;"></div>
+            <div class="chart-main" id="chart-area"></div>
+            <div class="w-220" style="background:#fff;"></div>
+        </div>
+
+        <div class="row-black" style="margin-top:2px;">
+            <div class="cell-border w-200" style="text-align:right; padding-right:10px;">號碼</div>
+            <div class="w-780" id="footer-0139"></div>
+            <div class="cell-border w-220"></div>
+        </div>
     </div>
 
 <script>
-    let isIssueMode = false; 
-    let sortMode = 0; // 0:紅圈, 1:深藍圈, 2:深紅圈
-    const modes = [
-        { label: "號碼紅圈", color: "lamp-red" },
-        { label: "遞增深藍", color: "lamp-blue" },
-        { label: "落球深紅", color: "lamp-darkred" }
-    ];
+    let dateMode = 0; 
+    let sortMode = 0; 
+    const displayCount = 30;
 
-    function toggleDate() { isIssueMode = !isIssueMode; render(); }
-    function toggleSort() { sortMode = (sortMode + 1) % 3; render(); }
+    function toggleDateMode() { dateMode = 1 - dateMode; render(); }
+    function toggleSortMode() { sortMode = (sortMode + 1) % 3; render(); }
 
     function render() {
-        document.getElementById('h-date').innerText = isIssueMode ? "期次" : "日期";
-        document.getElementById('h-sort').innerText = modes[sortMode].label;
+        if (typeof aaa === 'undefined') return;
+        const container = document.getElementById('main-content');
+        const dataSlice = aaa.slice(0, displayCount);
+        let counts = Array(40).fill(0);
+
+        const sortLabels = ["號碼", "遞增", "落球序"];
+        document.getElementById('head-sort').innerText = sortLabels[sortMode];
+        document.getElementById('head-date').innerText = (dateMode === 0) ? "日期" : "期次";
 
         let html = '';
-        for (let r = 0; r < 20; r++) {
-            if (!aaa[r]) break;
-            
-            // 1. 日期/期次切換
-            let displayDate = isIssueMode ? aaa[r][2] : aaa[r][0].split('(')[0];
-            
-            // 2. 號碼欄切換模式
-            // sortMode 0 & 1 用遞增(aaa[r][1]), 模式 2 用落球序(aaa[r][3])
-            let currentNums = (sortMode === 2) ? aaa[r][3] : aaa[r][1];
-            let displayNums = currentNums.join(',');
+        dataSlice.forEach((row, index) => {
+            const dateStr = row[0]; const winNums = row[1]; const idStr = row[2]; const dropNums = row[3];
+            let displayNums = [];
+            let ballClass = "";
 
-            html += `<div class="grid-row">`;
-            html += `<div class="cell w-date col-clickable" onclick="toggleDate()">${displayDate}</div>`;
-            html += `<div class="cell w-nums col-clickable" onclick="toggleSort()" style="color:blue;">${displayNums}</div>`;
-            
-            html += `<div class="w-balls">`;
-            for (let i = 1; i <= 39; i++) {
-                let ballStr = i < 10 ? '0' + i : '' + i;
-                // 燈亮不亮永遠根據當前開出的號碼 (aaa[r][1])
-                let isHit = aaa[r][1].includes(ballStr);
-                html += `<div class="cell">${isHit ? `<div class="lamp ${modes[sortMode].color}">${ballStr}</div>` : r+1}</div>`;
+            if (sortMode === 0) { displayNums = [...winNums]; ballClass = "ball-darkred"; }
+            else if (sortMode === 1) { displayNums = [...winNums].sort((a,b)=>a-b); ballClass = "ball-red"; }
+            else { displayNums = [...dropNums]; ballClass = "ball-blue"; }
+
+            html += `<div class="row-data">
+                <div class="c-date" onclick="toggleDateMode()">${dateMode === 0 ? dateStr : idStr}</div>
+                <div class="c-nums" onclick="toggleSortMode()">${displayNums.join(',')}</div>
+                <div class="ball-zone">
+                    ${Array.from({length:39}, (_, i) => {
+                        const n = (i + 1).toString().padStart(2, '0');
+                        const hit = winNums.includes(n);
+                        if(hit) counts[i+1]++;
+                        return `<div class="ball-slot">${hit ? `<div class="ball ${ballClass}">${n}</div>` : ''}</div>`;
+                    }).join('')}
+                </div>
+                <div class="c-sharp">${index + 1}</div>
+                <div class="w-200">""</div>
+            </div>`;
+        });
+        container.innerHTML = html;
+
+        // 更新統計與柱狀圖 (邏輯同前)
+        const maxC = Math.max(...counts.slice(1)) || 1;
+        document.getElementById('stat-total').innerText = `共${displayCount}期`;
+        document.getElementById('stat-max-label').innerText = `次數 ${maxC}`;
+        document.getElementById('stat-cells').innerHTML = counts.slice(1).map(c => 
+            `<div class="ball-slot" style="border-right:1px solid #bbb;">${c > 0 ? c : ''}</div>`
+        ).join('');
+
+        const chartArea = document.getElementById('chart-area');
+        let chartHtml = `<div class="line-red" style="bottom: 80px;"></div>`;
+        counts.slice(1).forEach((val, idx) => {
+            if (val > 0) {
+                let h = (val / maxC) * 95;
+                chartHtml += `<div class="bar" style="height:${h}px; left:${idx*20+3}px;"></div>`;
             }
-            html += `</div>`;
-            html += `<div class="cell w-index">${r+1}</div>`;
-            html += `</div>`;
-        }
-
-        // 黑尾列
-        html += `<div class="grid-row footer-black">`;
-        html += `<div class="cell w-date">[]</div><div class="cell w-nums">[]</div>`;
-        html += `<div class="w-balls">`;
-        for (let i = 1; i <= 39; i++) html += `<div class="cell">[]</div>`;
-        html += `</div><div class="cell w-index">[]</div></div>`;
-
-        document.getElementById('data-container').innerHTML = html;
+        });
+        chartArea.innerHTML = chartHtml;
     }
+
+    const numLine = Array.from({length:39}, (_, i) => 
+        `<div style="width:20px; border-right:1px solid #fff; text-align:center; flex-shrink:0;">${(i+1).toString().padStart(2,'0')}</div>`
+    ).join('');
+    document.getElementById('header-0139').innerHTML = numLine;
+    document.getElementById('footer-0139').innerHTML = numLine;
 
     window.onload = render;
 </script>
