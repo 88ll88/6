@@ -2,129 +2,155 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>539 分佈圖 - 導航全黑版</title>
+    <title>539 柱狀圖 - 點擊縮放版</title>
     <style>
+        /* 保留你原本的 CSS 基礎 */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Consolas", "微軟正黑體"; }
-        /* 頁面大底白色，確保縫隙是白的 */
-        body { background: #fff; width: 1200px; margin: 0 auto; padding-top: 5px; }
-        
-        /* 💡 導航列改為全黑底 */
+        body { background: #f4f4f4; width: 1200px; margin: 0 auto; padding-top: 5px; }
         .nav-bar { width: 1200px; display: flex; gap: 1px; margin-bottom: 2px; background: #000; padding: 1px; }
         .nav-tab { flex: 1; padding: 10px 0; background: #222; color: #fff; font-size: 12px; text-align: center; text-decoration: none; border: 1px solid #444; }
-        .nav-tab.active { background: #ff9900 !important; color: #000 !important; font-weight: bold; border: 1px solid #fff; }
+        .nav-tab.active { background: #ff9900 !important; color: #000 !important; font-weight: bold; }
 
-        .viewport { width: 1200px; background: #fff; border: 1px solid #666; }
-        .grid-row { display: flex; height: 20px; border-bottom: 1px solid #ddd; align-items: center; }
+        .viewport { width: 1200px; position: relative; border: 1px solid #000; background: #fff; }
+        .table-row { display: flex; width: 100%; border-bottom: 1px solid #ddd; cursor: pointer; transition: background 0.2s; }
+        .table-row:hover { background: #f0f0f0; }
+
+        .cell-side { width: 200px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .cell-main { width: 800px; position: relative; border-left: 1px solid #000; border-right: 1px solid #000; overflow: hidden; }
         
-        /* 單元格基礎：黑底白字白框 (用於表頭、尾列、右欄) */
-        .cell { height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; 
-                background: #000; color: #fff; border-right: 1px solid #fff; }
+        /* 號碼頭 */
+        .header-bg { background: #000; height: 20px; cursor: default; }
+        .num-col { flex: 1; text-align: center; color: #fff; font-size: 10px; border: 1px solid #fff; line-height: 18px; }
+
+        /* 圖表元素 */
+        .chart-area { width: 100%; height: 100%; position: relative; }
+        .bar { position: absolute; bottom: 0; width: 16px; border-radius: 1px 1px 0 0; z-index: 10; }
+        .bar-count { position: absolute; width: 100%; text-align: center; color: #000; font-weight: bold; }
         
-        /* 寬度精確定義 */
-        .w-100 { width: 100px; }
-        .w-780 { width: 780px; display: flex; }
-        .w-20  { width: 20px; }
-        .w-200 { width: 200px; }
+        .bg-purple { background: #800080; } .bg-red { background: #FF0000; }
+        .bg-blue { background: #0000FF; } .bg-green { background: #008000; }
 
-        /* 數據區：中間白底 */
-        .data-row { background: #fff !important; }
-        .data-row .cell { background: #fff; color: #333; border-right: 1px solid #eee; }
-        /* 數據區最右邊兩格維持黑底 */
-        .data-row .w-index, .data-row .w-remark { background: #000 !important; color: #fff !important; border-right: 1px solid #fff !important; }
+        .line-black { position: absolute; left: 0; width: 100%; border-top: 1px solid #000; z-index: 5; }
+        .line-red { position: absolute; left: 0; width: 100%; border-top: 1px dashed red; z-index: 6; }
 
-        /* 亮燈圓圈 */
-        .lamp { width: 18px; height: 18px; border-radius: 50%; color: #fff; font-weight: bold; font-size: 10px; line-height: 18px; text-align: center; }
-        .lamp-red { background: #FF0000; }
-        .lamp-blue { background: #0000BB; }
-        .lamp-darkred { background: #8B0000; }
-
-        .text-right { justify-content: flex-end; padding-right: 10px; }
+        /* 返回按鈕 */
+        .btn-back { 
+            position: absolute; top: 5px; right: 5px; padding: 5px 15px;
+            background: #ff9900; color: #000; border: 2px solid #000;
+            font-weight: bold; cursor: pointer; z-index: 100;
+        }
     </style>
-
     <script src="aaa.js"></script>
 </head>
 <body>
 
     <div class="nav-bar">
-        <a href="分佈圖.html" class="nav-tab active">分佈圖</a>
-        <a href="柱狀圖.html" class="nav-tab">柱狀圖</a>
-        <a href="三分區.html" class="nav-tab">三分區</a>
-        <a href="拖牌.html" class="nav-tab">拖牌</a>
-        <a href="遺漏.html" class="nav-tab">遺漏</a>
-        <a href="統計表.html" class="nav-tab">統計表</a>
+        <a href="#" class="nav-tab">分佈圖</a>
+        <a href="#" class="nav-tab active">柱狀圖</a>
+        <a href="#" class="nav-tab">三分區</a>
+        <a href="#" class="nav-tab">拖牌</a>
+        <a href="#" class="nav-tab">遺漏</a>
     </div>
 
     <div class="viewport">
-        <div class="grid-row">
-            <div class="cell w-100" onclick="toggleDate()" id="h-date">日期</div>
-            <div class="cell w-100" onclick="toggleSort()" id="h-sort">號碼紅圈</div>
-            <div class="w-780">
-                <script>
-                    for(let i=1; i<=39; i++) {
-                        let num = i < 10 ? '0' + i : i;
-                        document.write(`<div class="cell w-20">${num}</div>`);
-                    }
-                </script>
-            </div>
-            <div class="cell w-20">#</div>
-            <div class="cell w-200">備註</div>
+        <div id="back-ctrl"></div> <div class="table-row header-bg">
+            <div class="cell-side" style="background:#000; color:#fff;">號碼</div>
+            <div class="cell-main" id="header-nums" style="display:flex; border:none;"></div>
+            <div class="cell-side" style="background:#000; color:#fff;">號碼</div>
         </div>
-        
-        <div id="data-container"></div>
 
-        <div class="grid-row">
-            <div class="cell w-200 text-right">號碼</div>
-            <div class="w-780">
-                <script>
-                    for(let i=1; i<=39; i++) {
-                        let num = i < 10 ? '0' + i : i;
-                        document.write(`<div class="cell w-20">${num}</div>`);
-                    }
-                </script>
-            </div>
-            <div class="cell w-20"></div>
-            <div class="cell w-200"></div>
-        </div>
+        <div id="main-content"></div>
     </div>
 
 <script>
-    let isIssueMode = false; 
-    let sortMode = 0; 
-    const modes = [
-        { label: "號碼紅圈", color: "lamp-red" },
-        { label: "遞增深藍", color: "lamp-blue" },
-        { label: "落球深紅", color: "lamp-darkred" }
-    ];
+    let detailedNum = null; // 當前展開的號碼，null 表示全覽(五小區)
 
-    function toggleDate() { isIssueMode = !isIssueMode; render(); }
-    function toggleSort() { sortMode = (sortMode + 1) % 3; render(); }
+    function getStats(targetNum) {
+        let stats = Array(40).fill(0);
+        for (let i = 1; i < aaa.length; i++) {
+            if (aaa[i][1].includes(targetNum)) {
+                aaa[i-1][1].forEach(winN => stats[parseInt(winN)]++);
+            }
+        }
+        return stats.slice(1);
+    }
+
+    // 點擊事件：切換到詳細模式
+    function showDetail(n) {
+        detailedNum = n;
+        render();
+    }
+
+    // 返回事件：切換回全覽
+    function resetView() {
+        detailedNum = null;
+        render();
+    }
 
     function render() {
-        const container = document.getElementById('data-container');
         if (typeof aaa === 'undefined') return;
-
-        document.getElementById('h-date').innerText = isIssueMode ? "期次" : "日期";
-        document.getElementById('h-sort').innerText = modes[sortMode].label;
+        const container = document.getElementById('main-content');
+        const backCtrl = document.getElementById('back-ctrl');
+        const latestNums = aaa[0][1];
+        
+        // 決定要渲染哪些號碼
+        // 如果 detailedNum 有值，就只顯示那一區；否則顯示全部五區
+        const targetList = detailedNum ? [detailedNum] : latestNums;
+        
+        // 渲染返回按鈕
+        backCtrl.innerHTML = detailedNum ? `<button class="btn-back" onclick="resetView()">返回五區全覽</button>` : '';
 
         let html = '';
-        for (let r = 0; r < 20; r++) {
-            if (!aaa[r]) break;
-            let displayDate = isIssueMode ? aaa[r][2] : aaa[r][0].split('(')[0];
-            let currentNums = (sortMode === 2) ? (aaa[r][3] || aaa[r][1]) : aaa[r][1];
+        targetList.forEach(n => {
+            const data = getStats(n);
+            const sorted = [...data].sort((a,b)=>b-a);
+            
+            // 根據模式決定座標參數
+            const isFocus = (detailedNum !== null);
+            const rowH = isFocus ? 400 : 100;
+            const floor = isFocus ? 20 : 5;
+            const ceil = isFocus ? 380 : 95;
+            const redY = isFocus ? 360 : 90;
+            
+            const maxC = sorted[0];
+            const minC = sorted[sorted.length-1];
+            const diffC = (maxC - minC) || 1;
+            const diffP = ceil - floor;
 
-            html += `<div class="grid-row data-row">`;
-            html += `<div class="cell w-100" onclick="toggleDate()">${displayDate}</div>`;
-            html += `<div class="cell w-100" onclick="toggleSort()" style="color:blue;">${currentNums.join(',')}</div>`;
-            html += `<div class="w-780">`;
-            for (let i = 1; i <= 39; i++) {
-                let b = i < 10 ? '0' + i : '' + i;
-                let isHit = aaa[r][1].includes(b);
-                html += `<div class="cell w-20" onclick="toggleSort()">${isHit ? `<div class="lamp ${modes[sortMode].color}">${b}</div>` : r+1}</div>`;
-            }
-            html += `</div><div class="cell w-20 w-index">${r+1}</div><div class="cell w-200 w-remark"></div></div>`;
-        }
+            html += `
+                <div class="table-row" onclick="showDetail('${n}')">
+                    <div class="cell-side" style="height:${rowH}px">源頭: ${n}</div>
+                    <div class="cell-main" style="height:${rowH}px">
+                        <div class="chart-area">
+                            <div class="line-black" style="bottom:${ceil}px;"></div>
+                            <div class="line-black" style="bottom:${floor}px;"></div>
+                            <div class="line-red" style="bottom:${redY}px;"></div>
+                            ${data.map((val, idx) => {
+                                let h = floor + (val - minC) * (diffP / diffC);
+                                if (h < 2) h = 2;
+                                
+                                let color = "bg-purple";
+                                if (val === sorted[0] && val > 0) color = "bg-red";
+                                else if (val === sorted[1] && val > 0) color = "bg-blue";
+                                else if (val === sorted[2] && val > 0) color = "bg-green";
+
+                                return `<div class="bar ${color}" style="height:${h}px; left:${idx*(800/39)+2}px; width:16px;">
+                                            <div class="bar-count" style="font-size:${isFocus?11:9}px; top:${isFocus?-18:-12}px;">${val}</div>
+                                        </div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                    <div class="cell-side" style="height:${rowH}px">""</div>
+                </div>
+            `;
+        });
         container.innerHTML = html;
     }
+
+    document.getElementById('header-nums').innerHTML = Array.from({length:39}, (_,i)=>(i+1).toString().padStart(2,'0')).map(n=>
+        `<div class="num-col">${n}</div>`
+    ).join('');
+
     window.onload = render;
 </script>
 </body>
