@@ -2,53 +2,58 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>遺漏統計</title>
+    <title>539 遺漏分析</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Consolas", "微軟正黑體"; }
-        body { background: #fff; width: 1200px; margin: 0 auto; padding-top: 5px; }
+        body { background: #f4f4f4; width: 1200px; margin: 0 auto; padding-top: 5px; }
         
-        .nav-bar { width: 1200px; display: flex; gap: 1px; margin-bottom: 2px; background: #000; padding: 1px; }
-        .nav-tab { flex: 1; padding: 10px 0; background: #222; color: #fff; font-size: 12px; text-align: center; text-decoration: none; border: 1px solid #444; }
-        .nav-tab.active { background: #ff9900 !important; color: #000 !important; font-weight: bold; border: 1px solid #fff; }
+        /* 經典 nav-bar 結構 */
+        .nav-bar { 
+            width: 1200px; height: 32px; background: #000; 
+            display: flex; border: 1px solid #fff; margin-bottom: 5px; 
+        }
+        .nav-bar a { 
+            flex: 1; height: 30px; display: flex; align-items: center; justify-content: center; 
+            color: #fff; text-decoration: none; font-size: 14px; font-weight: bold; 
+            border-right: 1px solid #fff;
+        }
+        .nav-bar a:hover { background: #333; color: #ff0; }
+        .nav-bar a.active { background: #fff; color: #000; }
+        .nav-bar a:last-child { border-right: none; }
 
-        .viewport { width: 1200px; background: #fff; border: 1px solid #666; }
-        .grid-row { display: flex; height: 20px; align-items: center; border-bottom: 1px solid #eee; overflow: hidden; }
-        .cell { height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; flex-shrink: 0; }
+        /* 視口與表格寬度 */
+        .viewport { width: 1200px; border: 1px solid #000; background: #fff; }
         
-        .w-100 { width: 100px !important; }
-        .w-780 { width: 780px !important; display: flex; }
-        .w-20  { width: 20px !important; }
-        .w-side { width: 20px !important; background: #000 !important; color: #fff !important; border-right: 1px solid #fff; }
-        .w-remark { width: 200px !important; height: 20px; justify-content: flex-start; padding-left: 5px; font-size: 11px; border-left: 1px solid #ddd; }
-
-        .data-row .cell { background: #fff; color: #999; border-right: 1px solid #f0f0f0; }
-        .omission-deep { background: #666 !important; color: #fff !important; border-right: 1px solid #fff !important; }
-
-        /* 燈號 */
-        .lamp { width: 18px; height: 18px; border-radius: 50%; color: #fff !important; font-weight: bold; font-size: 10px; line-height: 18px; text-align: center; display: inline-block; margin-right: 1px; }
-        .bg-red { background: #FF0000 !important; }
-        .bg-blue { background: #0000BB !important; }
-        .bg-darkred { background: #8B0000 !important; }
-        .bg-deepblue { background: #00008B !important; }
-
-        /* 統計配色 */
-        .bg-mid-gray { background: #555 !important; }
-        .bg-mid-gray .w-780 .cell { color: #fff !important; border: none !important; }
-        .text-white { color: #fff !important; font-weight: bold; }
-
-        .bg-black-tail { background: #000 !important; color: #fff !important; }
-        .bg-black-tail .cell { border-right: 1px solid #fff !important; }
-
-        .bg-light-gray { background: #ccc !important; }
-        .bg-light-gray .title-black { color: #000 !important; font-weight: bold; }
-        .bg-light-gray .w-780 .cell { border-right: 1px solid #bbb; color: #000 !important; font-weight: bold; }
+        /* 表頭 row-black */
+        .row-black { background: #000; color: #fff; font-size: 12px; font-weight: bold; height: 20px; display: flex; }
+        .black-cell { border: 1px solid #fff; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
         
-        /* 表格內的一二名白字 */
-        .rank-white { color: #fff !important; }
+        /* 尺寸定義 */
+        .w-100 { width: 100px; flex-shrink: 0; }
+        .w-780 { width: 780px; flex-shrink: 0; display: flex; }
+        .w-20 { width: 20px; flex-shrink: 0; }
+        .w-200 { width: 200px; flex-shrink: 0; }
+        .flex-center { display: flex; align-items: center; justify-content: center; }
+        .pointer { cursor: pointer; user-select: none; }
+
+        /* 內容滾動區 */
+        .scroll-area { height: 400px; overflow-y: scroll; border-bottom: 2px solid #000; }
+        .row-data { display: flex; height: 20px; border-bottom: 1px solid #ddd; font-size: 11px; }
+        .cell { width: 20px; height: 20px; border: 1px solid #fff; background: #eee; flex-shrink: 0; }
+        
+        /* 遺漏計算邏輯色塊 */
+        .active-omit { background: #bbb !important; color: #333; font-weight: bold; }
+        .ended-omit { color: #999; }
+        .ball-hit { font-weight: bold; font-size: 16px; line-height: 18px; text-align: center; }
+        
+        /* 統計與歷史 */
+        .row-period { background: #fdf2d0; height: 20px; display: flex; font-size: 11px; font-weight: bold; border-bottom: 1px solid #999; cursor: pointer; }
+        .row-history { background: #e0e0e0; height: 20px; display: flex; font-size: 9px; font-weight: bold; border-bottom: 1px solid #000; }
+        .label-zone { width: 200px; border-right: 1px solid #999; text-align: center; line-height: 20px; }
     </style>
-    <script src="aaa.js"></script>
 </head>
 <body>
+
     <div class="nav-bar">
         <a href="分佈圖.html" class="nav-tab">分佈圖</a>
         <a href="柱狀圖.html" class="nav-tab">柱狀圖</a>
@@ -57,146 +62,126 @@
         <a href="遺漏.html" class="nav-tab active">遺漏</a>
         <a href="統計表.html" class="nav-tab">統計表</a>    
     </div>
-    <div class="viewport">
-        <div class="grid-row bg-black-tail">
-            <div class="cell w-100 text-white" onclick="toggleDate()" id="h-date">日期</div>
-            <div class="cell w-100 text-white" onclick="toggleSort()" id="h-sort">號碼紅圈</div>
-            <div class="w-780">
-                <script>for(let i=1;i<=39;i++) document.write(`<div class="cell w-20">${i<10?'0'+i:i}</div>`);</script>
-            </div>
-        </div>
-        <div id="data-container"></div>
-        <div id="stat-container"></div>
+
+<div class="viewport">
+    <div class="row-black">
+        <div class="w-100 black-cell pointer" onclick="toggleDate()">日期</div>
+        <div id="sort-label" class="w-100 black-cell pointer" onclick="toggleSort()">號碼</div>
+        <div id="h-nums" class="w-780 flex-center"></div>
+        <div class="w-20 black-cell">#</div>
+        <div class="w-200 black-cell"></div>
     </div>
 
-<script>
-    let isIssueMode = false, sortMode = 0; 
+    <div id="main-content" class="scroll-area"></div>
 
-    function toggleDate() { isIssueMode = !isIssueMode; render(); }
+    <div class="row-period" onclick="cycleP()">
+        <div class="label-zone" id="p-title">近期統計 (30期) ▽</div>
+        <div id="p-cells" class="w-780 flex-center"></div>
+        <div class="w-220"></div>
+    </div>
+
+    <div class="row-history">
+        <div class="label-zone">最近最大遺漏</div>
+        <div id="current-miss" class="w-780 flex-center"></div>
+        <div class="w-220"></div>
+    </div>
+
+    <div class="row-history" style="background: #d0d0d0;">
+        <div class="label-zone">歷史最大遺漏</div>
+        <div id="history-max" class="w-780 flex-center"></div>
+        <div class="w-220"></div>
+    </div>
+
+    <div style="width:1200px; height:2px; background:#000;"></div>
+
+    <div class="row-black">
+        <div class="w-200 black-cell" style="justify-content: flex-end; padding-right: 10px;">號碼</div>
+        <div id="f-nums" class="w-780 flex-center"></div>
+        <div class="w-220 black-cell"></div>
+    </div>
+</div>
+
+<script src="aaa.js"></script>
+<script>
+    let pIdx = 0, dateMode = 0, sortMode = 0;
+    const steps = [30, 50, 100, 200, 500];
+    const sortNames = ["號碼", "遞增", "落球序"];
+    const hitColors = ["#8b0000", "#ff0000", "#00008b"]; 
+
+    function cycleP() { pIdx = (pIdx + 1) % steps.length; render(); }
+    function toggleDate() { dateMode = 1 - dateMode; render(); }
     function toggleSort() { sortMode = (sortMode + 1) % 3; render(); }
 
-    function getRankMap(arr) {
-        let uniqueVals = [...new Set(arr.slice(1))].sort((a, b) => b - a);
-        let map = {};
-        arr.forEach((val, idx) => {
-            if (idx === 0) return;
-            if (val === uniqueVals[0]) map[idx] = "bg-red";
-            else if (val === uniqueVals[1]) map[idx] = "bg-blue";
-        });
-        return { map, topVals: uniqueVals.slice(0, 2) };
-    }
-
     function render() {
-        if (typeof aaa === 'undefined') return;
-        const container = document.getElementById('data-container');
-        const statContainer = document.getElementById('stat-container');
+        if (!window.aaa) return;
+        const curLimit = steps[pIdx];
+        document.getElementById('p-title').innerText = `近期統計 (${curLimit}期) ▽`;
+        document.getElementById('sort-label').innerText = sortNames[sortMode];
+        const curHitColor = hitColors[sortMode]; 
 
-        const sortNames = ["號碼紅圈", "遞增深藍圈", "落球序深紅"];
-        document.getElementById('h-date').innerText = isIssueMode ? "期次" : "日期";
-        document.getElementById('h-sort').innerText = sortNames[sortMode];
-
-        let hMax = Array(40).fill(0), curM = Array(40).fill(0), tmpM = Array(40).fill(0);
-        let c20 = Array(40).fill(0), c50 = Array(40).fill(0), c100 = Array(40).fill(0), cT = Array(40).fill(0);
-
-        for (let r = aaa.length - 1; r >= 0; r--) {
-            for (let i = 1; i <= 39; i++) {
-                let n = i < 10 ? '0' + i : '' + i;
-                if (aaa[r][1].includes(n)) {
-                    if (tmpM[i] > hMax[i]) hMax[i] = tmpM[i];
-                    tmpM[i] = 0; cT[i]++;
-                    if (r < 20) c20[i]++;
-                    if (r < 50) c50[i]++;
-                    if (r < 100) c100[i]++;
-                } else { tmpM[i]++; }
-            }
-        }
-        curM = [...tmpM];
-
-        // --- 核心修改點：尾欄一二名白字 ---
-        let remArr = Array(20).fill("");
-        const sItems = [{t: "至今最大遺漏", d: curM}, {t: "歷史最大遺漏", d: hMax}, {t: "20期開獎次數", d: c20}, {t: "50期開獎次數", d: c50}, {t: "100期開獎次數", d: c100}, {t: "歷史開獎總計", d: cT}];
-        
-        sItems.forEach((s, idx) => {
-            let base = idx * 3;
-            if (base < 20) remArr[base] = `<b style="color:#000; text-decoration:underline;">${s.t}</b>`;
-            const ranks = getRankMap(s.d);
-            
-            ranks.topVals.forEach((val, rIdx) => {
-                let rowIdx = base + rIdx + 1;
-                if (rowIdx < 20) {
-                    let nums = s.d.map((v, x) => v === val ? (x < 10 ? '0' + x : x) : null).filter(v => v);
-                    let color = rIdx === 0 ? "bg-red" : "bg-blue";
-                    // 這裡加上 color:#fff 強制尾欄這兩行的字體變白色
-                    remArr[rowIdx] = `<span style="font-weight:bold; color:#fff;">${val}次 </span>${nums.map(n => `<span class="lamp ${color}">${n}</span>`).join('')}`;
+        let hMax = Array(40).fill(0), curCount = Array(40).fill(0), pCounts = Array(40).fill(0);
+        [...aaa].reverse().forEach(row => {
+            let wins = row[1].map(n => parseInt(n));
+            for(let n=1; n<=39; n++) {
+                if(wins.includes(n)) curCount[n] = 0;
+                else {
+                    curCount[n]++;
+                    if(curCount[n] > hMax[n]) hMax[n] = curCount[n];
                 }
-            });
+            }
         });
 
-        // 數據列
-        let html = '';
-        for (let r = 0; r < 20; r++) {
-            let currentNums, lampCls;
-            if (sortMode === 0) { currentNums = [...aaa[r][1]]; lampCls = "bg-red"; }
-            else if (sortMode === 1) { currentNums = [...aaa[r][1]].sort((a,b)=>a-b); lampCls = "bg-deepblue"; }
-            else { currentNums = [...(aaa[r][3] || aaa[r][1])]; lampCls = "bg-darkred"; }
-
-            // 判斷這一行是不是尾欄的一二名，如果是，背景要變黑/灰才看得到白字
-            let isRankRow = (r % 3 !== 0 && r < 18 && r > 0); 
-            let rowStyle = isRankRow ? "background:#333;" : ""; // 給個深色底讓白字顯現
-
-            html += `<div class="grid-row data-row">`;
-            html += `<div class="cell w-100" onclick="toggleDate()">${isIssueMode ? aaa[r][2] : aaa[r][0].split('(')[0]}</div>`;
-            html += `<div class="cell w-100" onclick="toggleSort()" style="color:blue; font-size:10px;">${currentNums.join(',')}</div>`;
-            html += `<div class="w-780">`;
-            for (let i = 1; i <= 39; i++) {
-                let n = i < 10 ? '0' + i : '' + i;
-                let depth = 0; for(let k=r+1; k<aaa.length; k++) { if(aaa[k][1].includes(n)) break; depth++; }
-                if (aaa[r][1].includes(n)) {
-                    html += `<div class="cell w-20"><div class="lamp ${lampCls}">${n}</div></div>`;
+        let html = '', stopFlags = Array(40).fill(false);
+        aaa.slice(0, curLimit).forEach((row, i) => {
+            let wins = row[1].map(n => parseInt(n));
+            wins.forEach(n => pCounts[n]++);
+            let dVal = (dateMode === 0) ? row[0] : row[2];
+            let showNums = (sortMode === 0) ? [...wins] : (sortMode === 1 ? [...wins].sort((a,b)=>a-b) : [...row[3]]);
+            
+            let cells = '';
+            for(let n=1; n<=39; n++) {
+                let val = 0;
+                for(let k=i; k<aaa.length; k++) {
+                    if(aaa[k][1].includes(n.toString().padStart(2,'0'))) break;
+                    val++;
+                }
+                if(val === 0) {
+                    cells += `<div class="cell ball-hit" style="color:${curHitColor}">●</div>`;
+                    stopFlags[n] = true; 
                 } else {
-                    let cls = (curM[i] >= 10 && !aaa.slice(0, r+1).some(row=>row[1].includes(n))) ? 'omission-deep' : '';
-                    html += `<div class="cell w-20 ${cls}">${depth+1}</div>`;
+                    cells += `<div class="cell flex-center ${!stopFlags[n] ? 'active-omit' : 'ended-omit'}">${val}</div>`;
                 }
             }
-            // 這裡套用 rowStyle 到尾欄背景
-            html += `</div><div class="cell w-side">${r+1}</div><div class="cell w-remark" style="${rowStyle}">${remArr[r]}</div></div>`;
-        }
-        container.innerHTML = html;
 
-        // 統計列
-        let sHtml = '';
-        const buildGrayRow = (lbl, data) => {
-            let h = `<div class="grid-row bg-mid-gray">`;
-            h += `<div class="cell w-100 text-white"></div><div class="cell w-100 text-white" style="justify-content:flex-end; padding-right:5px;">${lbl}</div><div class="w-780">`;
-            for(let i=1; i<=39; i++) h += `<div class="cell w-20">${data[i]}</div>`;
-            h += `</div></div>`;
-            return h;
-        };
-        sHtml += buildGrayRow("至今最大遺漏", curM);
-        sHtml += buildGrayRow("歷史最大遺漏", hMax);
-        
-        sHtml += `<div class="grid-row bg-black-tail"><div class="cell w-100 text-white"></div><div class="cell w-100 text-white" style="justify-content:flex-end; padding-right:5px;">號碼</div><div class="w-780">`;
-        for(let i=1;i<=39;i++) sHtml += `<div class="cell w-20">${i<10?'0'+i:i}</div>`;
-        sHtml += `</div></div>`;
-        
-        const buildLightRow = (lbl, data) => {
-            const ranks = getRankMap(data);
-            let h = `<div class="grid-row bg-light-gray">`;
-            h += `<div class="cell w-100 title-black"></div><div class="cell w-100 title-black" style="justify-content:flex-end; padding-right:5px;">${lbl}</div><div class="w-780">`;
-            for(let i=1; i<=39; i++) {
-                let rCls = ranks.map[i] ? (ranks.map[i] + " rank-white") : "";
-                h += `<div class="cell w-20 ${rCls}">${data[i]}</div>`;
+            html += `<div class="row-data">
+                <div class="w-100 flex-center pointer" onclick="toggleDate()">${dVal}</div>
+                <div class="w-100 flex-center pointer" style="font-weight:bold; border-right:1px solid #000;" onclick="toggleSort()">${showNums.join(',')}</div>
+                <div class="w-780 flex-center">${cells}</div>
+                <div class="w-20 flex-center" style="background:#eee; font-weight:bold; border-right:1px solid #fff;">${i + 1}</div>
+                <div class="w-200"></div>
+            </div>`;
+        });
+
+        document.getElementById('main-content').innerHTML = html;
+        document.getElementById('p-cells').innerHTML = pCounts.slice(1).map(c => `<div class="cell flex-center">${c}</div>`).join('');
+        document.getElementById('current-miss').innerHTML = Array.from({length:39},(_,idx)=>{
+            let n = idx+1;
+            let c = 0;
+            for(let k=0; k<aaa.length; k++) {
+                if(aaa[k][1].includes(n.toString().padStart(2,'0'))) break;
+                c++;
             }
-            h += `</div><div class="cell w-20"></div><div class="cell w-remark"></div></div>`;
-            return h;
-        };
-        sHtml += buildLightRow("20期開獎次數", c20);
-        sHtml += buildLightRow("50期開獎次數", c50);
-        sHtml += buildLightRow("100期開獎次數", c100);
-        sHtml += buildLightRow("歷史開獎總計", cT);
-        statContainer.innerHTML = sHtml;
+            return `<div class="cell flex-center">${c}</div>`;
+        }).join('');
+        document.getElementById('history-max').innerHTML = hMax.slice(1).map(v => `<div class="cell flex-center" style="color:#c00;">${v}</div>`).join('');
     }
-    window.onload = render;
+
+    window.onload = () => {
+        const ns = Array.from({length:39},(_,i)=> `<div class="num-black flex-center">${(i+1).toString().padStart(2,'0')}</div>`).join('');
+        document.getElementById('h-nums').innerHTML = ns;
+        document.getElementById('f-nums').innerHTML = ns;
+        render();
+    };
 </script>
 </body>
-</html>
+</html>          
