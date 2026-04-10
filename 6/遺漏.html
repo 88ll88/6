@@ -7,7 +7,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Consolas", "微軟正黑體"; }
         body { background: #f4f4f4; width: 1200px; margin: 0 auto; padding-top: 5px; }
         
-        /* 經典 nav-bar 結構 */
+        /* 經典 nav-bar */
         .nav-bar { 
             width: 1200px; height: 32px; background: #000; 
             display: flex; border: 1px solid #fff; margin-bottom: 5px; 
@@ -21,27 +21,27 @@
         .nav-bar a.active { background: #fff; color: #000; }
         .nav-bar a:last-child { border-right: none; }
 
-        /* 視口與表格寬度 */
         .viewport { width: 1200px; border: 1px solid #000; background: #fff; }
         
-        /* 表頭 row-black */
+        /* 表頭與尾列基礎：黑底白字白框 */
         .row-black { background: #000; color: #fff; font-size: 12px; font-weight: bold; height: 20px; display: flex; }
         .black-cell { border: 1px solid #fff; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-        
-        /* 尺寸定義 */
+        .num-black { width: 20px; height: 20px; border: 1px solid #fff; background: #000; color: #fff; flex-shrink: 0; font-size: 11px; }
+
+        /* 寬度鎖死 */
         .w-100 { width: 100px; flex-shrink: 0; }
         .w-780 { width: 780px; flex-shrink: 0; display: flex; }
         .w-20 { width: 20px; flex-shrink: 0; }
         .w-200 { width: 200px; flex-shrink: 0; }
+        .w-220 { width: 220px; flex-shrink: 0; }
+
         .flex-center { display: flex; align-items: center; justify-content: center; }
         .pointer { cursor: pointer; user-select: none; }
 
-        /* 內容滾動區 */
+        /* 數據區 */
         .scroll-area { height: 400px; overflow-y: scroll; border-bottom: 2px solid #000; }
         .row-data { display: flex; height: 20px; border-bottom: 1px solid #ddd; font-size: 11px; }
         .cell { width: 20px; height: 20px; border: 1px solid #fff; background: #eee; flex-shrink: 0; }
-        
-        /* 遺漏計算邏輯色塊 */
         .active-omit { background: #bbb !important; color: #333; font-weight: bold; }
         .ended-omit { color: #999; }
         .ball-hit { font-weight: bold; font-size: 16px; line-height: 18px; text-align: center; }
@@ -54,14 +54,14 @@
 </head>
 <body>
 
-    <div class="nav-bar">
-        <a href="分佈圖.html" class="nav-tab">分佈圖</a>
-        <a href="柱狀圖.html" class="nav-tab">柱狀圖</a>
-        <a href="三分區.html" class="nav-tab">三分區</a>
-        <a href="拖牌.html" class="nav-tab">拖牌</a>
-        <a href="遺漏.html" class="nav-tab active">遺漏</a>
-        <a href="統計表.html" class="nav-tab">統計表</a>    
-    </div>
+<div class="nav-bar">
+    <a href="分佈圖.html">分佈圖</a>
+    <a href="拖牌.html">拖牌分析</a>
+    <a href="遺漏.html" class="active">遺漏分析</a>
+    <a href="三分區.html">三分區</a>
+    <a href="柱狀圖.html">柱狀圖</a>
+    <a href="統計表.html">統計表</a>
+</div>
 
 <div class="viewport">
     <div class="row-black">
@@ -69,7 +69,7 @@
         <div id="sort-label" class="w-100 black-cell pointer" onclick="toggleSort()">號碼</div>
         <div id="h-nums" class="w-780 flex-center"></div>
         <div class="w-20 black-cell">#</div>
-        <div class="w-200 black-cell"></div>
+        <div class="w-200 black-cell">""</div>
     </div>
 
     <div id="main-content" class="scroll-area"></div>
@@ -97,7 +97,7 @@
     <div class="row-black">
         <div class="w-200 black-cell" style="justify-content: flex-end; padding-right: 10px;">號碼</div>
         <div id="f-nums" class="w-780 flex-center"></div>
-        <div class="w-220 black-cell"></div>
+        <div class="w-220 black-cell">""</div>
     </div>
 </div>
 
@@ -164,15 +164,17 @@
 
         document.getElementById('main-content').innerHTML = html;
         document.getElementById('p-cells').innerHTML = pCounts.slice(1).map(c => `<div class="cell flex-center">${c}</div>`).join('');
-        document.getElementById('current-miss').innerHTML = Array.from({length:39},(_,idx)=>{
-            let n = idx+1;
+        
+        let currentOmits = [];
+        for(let n=1; n<=39; n++) {
             let c = 0;
             for(let k=0; k<aaa.length; k++) {
                 if(aaa[k][1].includes(n.toString().padStart(2,'0'))) break;
                 c++;
             }
-            return `<div class="cell flex-center">${c}</div>`;
-        }).join('');
+            currentOmits[n] = c;
+        }
+        document.getElementById('current-miss').innerHTML = currentOmits.slice(1).map(v => `<div class="cell flex-center">${v}</div>`).join('');
         document.getElementById('history-max').innerHTML = hMax.slice(1).map(v => `<div class="cell flex-center" style="color:#c00;">${v}</div>`).join('');
     }
 
@@ -184,4 +186,4 @@
     };
 </script>
 </body>
-</html>          
+</html>
