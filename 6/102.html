@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { width: 1100px; margin: 0; font-family: Arial; background-color: #fff; color: #000; }
+        
+        /* 1. 導航列：整列黑底 */
+        .nav { display: flex; background: #000; height: 30px; line-height: 40px; position: sticky; top: 0; z-index: 100; }
+        .nav a { color: #fff; text-decoration: none; padding: 0 20px; font-size: 12px; border-right: 1px solid #333; }
+        .nav a:hover { background: #333; }
+        .nav a.active { background: #f00; font-weight: bold; }
+
+        /* 2. 數據區域：維持白底 */
+        .row { display: flex; height: 20px; line-height: 20px; border-bottom: 1px solid #ddd; font-size: 12px; }
+        .w100 { width: 80px; border-right: 1px solid #ddd; text-align: center; background: #f9f9f9; }
+        .cell { width: 20px; border-right: 1px solid #eee; text-align: center; color: #999; }
+        .hit { color: red; font-weight: bold; font-size: 18px; }
+        
+    </style>
+</head>
+<body>
+
+<div class="nav">
+    <a href="100.html">分佈圖</a>
+    <a href="101.html">拖牌</a>
+    <a href="102.html" class="active">遺漏</a>
+    <a href="103.html">三分區</a>
+    <a href="104.html">單双</a>
+    <a href="105.html">頭尾</a>
+    <a href="106.html">統計表</a>
+    <a href="107.html">連莊</a>
+    <a href="108.html">連號</a>
+    <a href="109.html">柱狀圖</a>
+    <a href="110.html">雙胞胎</a>
+    <a href="111.html"></a>
+    <a href="112.html"></a>
+</div>
+
+<script src="aaa.js"></script>
+
+<script>
+    var omits = [];
+    for (var k = 0; k < 39; k++) { omits[k] = 0; }
+    var allHtml = "";
+
+    // 處理 5835 筆數據
+    for (var i = 0; i < aaa.length; i++) {
+        var d = aaa[i];
+        var winArr = d[1].split(",");
+
+        for (var j = 1; j <= 39; j++) {
+            var nStr = (j < 10) ? "0" + j : "" + j;
+            var isHit = false;
+            for (var m = 0; m < winArr.length; m++) {
+                if (winArr[m] == nStr) { isHit = true; break; }
+            }
+            if (isHit) { omits[j-1] = 0; } else { omits[j-1]++; }
+        }
+
+        var h = '<div class="row">';
+        h += '<div class="w100">' + d[0] + '</div>';
+        h += '<div class="w100" style="color:#007bff;">' + d[1] + '</div>';
+        
+        for (var n = 1; n <= 39; n++) {
+            var nStr = (n < 10) ? "0" + n : "" + n;
+            var isHit = false;
+            for (var m = 0; m < winArr.length; m++) {
+                if (winArr[m] == nStr) { isHit = true; break; }
+            }
+            if (isHit) {
+                h += '<div class="cell hit">●</div>';
+            } else {
+                h += '<div class="cell">' + omits[n-1] + '</div>';
+            }
+        }
+        h += '</div>';
+        allHtml = h + allHtml;
+    }
+    document.write(allHtml);
+</script>
+
+</body>
+</html>
