@@ -54,3 +54,40 @@ function myBar(hBox, vHigh, vDash, vLow, data) {
     h += `<div style="width:220px"></div></div>`;
     return h;
 }
+
+// 模式 A：[01-39] 寬度 780 版 (純號碼)
+function bar780(n) {
+    let data = Array(40).fill(0);
+    let rows = aaa.slice(0, n); // 抓最近 n 期
+    rows.forEach(r => r[1].forEach(num => data[Number(num)]++)); // 算次數
+
+    let h = `<div style="width:1200px; display:flex; height:20px; line-height:20px; text-align:center; font-size:12px;">`;
+    h += `<div style="width:200px; border:1px solid #000; background:#eee;">最近${n}期次數</div>`; 
+    h += `<div style="width:780px; display:flex; border:1px solid #000; background:#fff;">`;
+    
+    for (let i = 1; i <= 39; i++) {
+        h += `<div style="width:20px; border-right:1px solid #ccc;">${data[i]}</div>`;
+    }
+    
+    h += `</div><div style="width:220px;"></div></div>`;
+    document.getElementById('view').innerHTML = h;
+}
+
+// 模式 B：[01-39#] 寬度 800 版 (有#號格)
+function bar800(n) {
+    let data = Array(40).fill(0);
+    let rows = aaa.slice(0, n);
+    rows.forEach(r => r[1].forEach(num => data[Number(num)]++));
+
+    let h = `<div style="width:1200px; display:flex; height:20px; line-height:20px; text-align:center; font-size:12px;">`;
+    h += `<div style="width:200px; border:1px solid #000; background:#eee;">最近${n}期次數</div>`;
+    h += `<div style="width:800px; display:flex; border:1px solid #000; background:#fff;">`;
+    
+    for (let i = 1; i <= 39; i++) {
+        h += `<div style="width:20px; border-right:1px solid #ccc;">${data[i]}</div>`;
+    }
+    
+    h += `<div style="width:20px; background:#ffff00;">#</div>`; // 第 40 格是 #
+    h += `</div><div style="width:200px;"></div></div>`;
+    document.getElementById('view').innerHTML = h;
+}
