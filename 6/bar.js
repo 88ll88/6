@@ -55,53 +55,47 @@ function myBar(hBox, vHigh, vDash, vLow, data) {
     return h;
 }
 
-// 模式 A：780 寬 (純 39 個號碼)
-function bar780(n) {
-    if (typeof aaa === 'undefined') return;
-    
-    // 1. 算次數
-    let data = Array(40).fill(0);
-    let rows = aaa.slice(0, n);
-    rows.forEach(r => {
-        if (r[1]) r[1].forEach(num => data[Number(num)]++);
-    });
-
-    // 2. 畫圖 (總寬 1200, 數據 780)
-    let h = `<div style="width:1200px; display:flex; height:20px; line-height:20px; text-align:center; font-size:12px;">`;
-    h += `<div style="width:200px; border:1px solid #000; background:#eee;">最近${n}期次數</div>`;
-    h += `<div style="width:780px; display:flex; border:1px solid #000; background:#fff;">`;
-    for (let i = 1; i <= 39; i++) {
-        h += `<div style="width:20px; border-right:1px solid #ccc;">${data[i]}</div>`;
-    }
-    h += `</div><div style="width:220px;"></div></div>`;
-
-    // 3. 顯示
-    let target = document.getElementById('view');
-    if (target) { target.innerHTML = h; } else { document.body.insertAdjacentHTML('beforeend', h); }
-}
-
-// 模式 B：800 寬 (39 個號碼 + 1格 #)
 function bar800(n) {
+    // 1. 沒數據就跳出
     if (typeof aaa === 'undefined') return;
 
-    // 1. 算次數
+    // 2. 算次數
     let data = Array(40).fill(0);
     let rows = aaa.slice(0, n);
     rows.forEach(r => {
-        if (r[1]) r[1].forEach(num => data[Number(num)]++);
+        if (r[1]) r[1].forEach(num => {
+            let v = parseInt(num, 10);
+            if (v >= 1 && v <= 39) data[v]++;
+        });
     });
 
-    // 2. 畫圖 (總寬 1200, 數據 800)
-    let h = `<div style="width:1200px; display:flex; height:20px; line-height:20px; text-align:center; font-size:12px;">`;
-    h += `<div style="width:200px; border:1px solid #000; background:#eee;">最近${n}期次數</div>`;
+    // 3. 組 HTML (鎖死 1200px)
+    let h = `<div style="width:1200px; display:flex; height:20px; line-height:20px; text-align:center; font-size:12px; border-bottom:1px solid #eee;">`;
+    h += `<div style="width:200px; border:1px solid #000; background:#f8f8f8;">最近${n}期次數</div>`;
     h += `<div style="width:800px; display:flex; border:1px solid #000; background:#fff;">`;
     for (let i = 1; i <= 39; i++) {
-        h += `<div style="width:20px; border-right:1px solid #ccc;">${data[i]}</div>`;
+        h += `<div style="width:20px; border-right:1px solid #ccc; flex-shrink:0;">${data[i]}</div>`;
     }
-    h += `<div style="width:20px; background:#ffff00;">#</div>`; // 第 40 格
+    h += `<div style="width:20px; background:#ffff00; flex-shrink:0;">#</div>`;
     h += `</div><div style="width:200px;"></div></div>`;
 
-    // 3. 顯示
-    let target = document.getElementById('view');
-    if (target) { target.innerHTML = h; } else { document.body.insertAdjacentHTML('beforeend', h); }
+    // 4. 平板專用：確保塞得進去
+    const showPlot = () => {
+        let target = document.getElementById('view');
+        if (target) {
+            target.innerHTML = h;
+        } else {
+            // 如果沒坑，直接在螢幕最上面插一塊區域顯示
+            let newDiv = document.createElement('div');
+            newDiv.innerHTML = h;
+            document.body.prepend(newDiv);
+        }
+    };
+
+    // 如果網頁還沒加載完，就等加載完再畫
+    if (document.readyState === 'loading') {
+        window.addEventListener('load', showPlot);
+    } else {
+        showPlot();
+    }
 }
