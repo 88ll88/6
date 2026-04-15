@@ -43,12 +43,4 @@ function Bar(hBox, vHigh, vDash, vLow, data) {
 
     h += `<div style="width:220px"></div></div>`;
     return h;
-}        h += `<div style="width:20px; display:flex; flex-direction:column; align-items:center; position:relative; z-index:2;">
-                <div style="width:20px; text-align:center; font-size:10px; color:#000; font-weight:bold; margin-bottom:2px;">${v}</div>
-                <div style="width:14px; height:${hPx}px; background:${color}"></div>
-              </div>`;
-    }
-
-    h += `<div style="width:220px"></div></div>`;
-    return h;
-}}
+}
