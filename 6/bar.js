@@ -55,47 +55,53 @@ function myBar(hBox, vHigh, vDash, vLow, data) {
     return h;
 }
 
-function bar800(n) {
-    // 1. 沒數據就跳出
-    if (typeof aaa === 'undefined') return;
 
-    // 2. 算次數
+
+// 第二個函數：畫 1200px 寬的次數列
+function bar800(n) {
+    // 1. 檢查數據 (這步最重要，沒數據會報錯)
+    if (typeof aaa === 'undefined') {
+        console.log("找不到 aaa 數據");
+        return;
+    }
+
+    // 2. 算次數 (抓最近 n 期)
     let data = Array(40).fill(0);
     let rows = aaa.slice(0, n);
+    
     rows.forEach(r => {
-        if (r[1]) r[1].forEach(num => {
-            let v = parseInt(num, 10);
-            if (v >= 1 && v <= 39) data[v]++;
-        });
+        if (r[1] && Array.isArray(r[1])) {
+            r[1].forEach(num => {
+                let v = parseInt(num, 10);
+                if (v >= 1 && v <= 39) data[v]++;
+            });
+        }
     });
 
-    // 3. 組 HTML (鎖死 1200px)
-    let h = `<div style="width:1200px; display:flex; height:20px; line-height:20px; text-align:center; font-size:12px; border-bottom:1px solid #eee;">`;
-    h += `<div style="width:200px; border:1px solid #000; background:#f8f8f8;">最近${n}期次數</div>`;
-    h += `<div style="width:800px; display:flex; border:1px solid #000; background:#fff;">`;
+    // 3. 畫 HTML (鎖死 1200px 寬度，每格 20px)
+    let h = `<div style="width:1200px; display:flex; height:20px; line-height:20px; text-align:center; font-size:12px; margin-bottom:2px;">`;
+    
+    // 左邊標題區 200px
+    h += `<div style="width:200px; border:1px solid #000; background:#eee; flex-shrink:0;">最近${n}期次數</div>`;
+    
+    // 數據區 800px (39格次數 + 1格#)
+    h += `<div style="width:800px; display:flex; border:1px solid #000; background:#fff; flex-shrink:0;">`;
     for (let i = 1; i <= 39; i++) {
-        h += `<div style="width:20px; border-right:1px solid #ccc; flex-shrink:0;">${data[i]}</div>`;
+        h += `<div style="width:20px; border-right:1px solid #ccc; flex-shrink:0; box-sizing:border-box;">${data[i]}</div>`;
     }
-    h += `<div style="width:20px; background:#ffff00; flex-shrink:0;">#</div>`;
-    h += `</div><div style="width:200px;"></div></div>`;
+    h += `<div style="width:20px; background:#ffff00; flex-shrink:0; box-sizing:border-box;">#</div>`;
+    h += `</div>`;
+    
+    // 右邊補白 200px
+    h += `<div style="width:200px; flex-shrink:0;"></div>`;
+    h += `</div>`;
 
-    // 4. 平板專用：確保塞得進去
-    const showPlot = () => {
-        let target = document.getElementById('view');
-        if (target) {
-            target.innerHTML = h;
-        } else {
-            // 如果沒坑，直接在螢幕最上面插一塊區域顯示
-            let newDiv = document.createElement('div');
-            newDiv.innerHTML = h;
-            document.body.prepend(newDiv);
-        }
-    };
-
-    // 如果網頁還沒加載完，就等加載完再畫
-    if (document.readyState === 'loading') {
-        window.addEventListener('load', showPlot);
+    // 4. 顯示到 id="view" 的地方
+    let target = document.getElementById('view');
+    if (target) {
+        target.innerHTML = h;
     } else {
-        showPlot();
+        // 如果網頁還沒加載完 view，就直接貼到最下面
+        document.body.insertAdjacentHTML('beforeend', h);
     }
 }
