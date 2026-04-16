@@ -72,4 +72,9 @@ function myBar(hBox, vHigh, vDash, vLow, data) {
     // 顯示在畫面上
     document.getElementById('view').innerHTML = txt;
 }
+function TT(x){
+       var xz= Array(40).fill(0);
+       aaa.slice(0, x).map(r =>r[1].map(n => xz[Number(n)]++));
+       return xz.slice(1,40);
+}
 
