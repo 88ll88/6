@@ -16,6 +16,7 @@ function dayOmiss() {
     }
     // 回傳這一列的 HTML
     return buildRowHtml("至今未開遺漏", nowM);
+    
 }
 
 // --- 2. 歷史最大遺漏 (只計算，回傳 HTML 字串) ---
@@ -114,6 +115,7 @@ function renderRealTimeOmission() {
     const target = document.getElementById('footer_area');
     if (target) target.innerHTML = html;
     else document.body.insertAdjacentHTML('beforeend', html);
+    return html;
 }
 
 function renderCurrentOmission(x = 50) {
@@ -164,4 +166,5 @@ function renderCurrentOmission(x = 50) {
     const target = document.getElementById('footer_area');
     if (target) target.innerHTML = html;
     else document.body.insertAdjacentHTML('beforeend', html);
+    return html;
 }
