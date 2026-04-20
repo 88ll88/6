@@ -1,6 +1,6 @@
-function xxxx(a,b){
-     return a×b;
+function xxxx(){
+     return 10;
 }
-function yyyy(a,b){
-  return a-b;
+function yyyy(){
+  return 9;
 }
