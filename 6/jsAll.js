@@ -115,10 +115,8 @@ function renderRealTimeOmission() {
     if (target) target.innerHTML = html;
     else document.body.insertAdjacentHTML('beforeend', html);
 }
-/**
- * @param {number} x - 計算的總行數 (預設 50 行)
- */
-function renderCurrentOmission() {
+
+function renderCurrentOmission(x = 50) {
     if (!window.aaa) return;
     
     // 取得最近 x 期的數據 (aaa[0] 是最新一期)
